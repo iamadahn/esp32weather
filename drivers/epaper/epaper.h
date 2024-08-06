@@ -64,12 +64,12 @@ extern "C"
     typedef struct {
         spi_host_device_t spi_host;
         spi_device_handle_t spi_handle;
-        gpio_num_t miso_pin;
-        gpio_num_t mosi_pin;
-        gpio_num_t clk_pin;
+        gpio_num_t sda_pin;
+        gpio_num_t scl_pin;
         gpio_num_t cs_pin;
         gpio_num_t dc_pin;
         gpio_num_t res_pin;
+        gpio_num_t busy_pin;
     } epaper_t;
 
     typedef struct
@@ -89,16 +89,16 @@ extern "C"
     void epaper_init(epaper_t* epaper);
 
     void epd_io_init(void);
-    uint8_t epd_init(void);
+    uint8_t epd_init(epaper_t* epaper);
     uint8_t epd_init_partial(void);
     void epd_enter_deepsleepmode(uint8_t mode);
-    uint8_t epd_power_on(void);
-	uint8_t epd_power_off(void);
+    uint8_t epd_power_on(epaper_t* epaper);
+    uint8_t epd_power_off(epaper_t* epaper);
     void epd_init_internalTempSensor(void);
     void epd_update(void);
     void epd_update_partial(void);
-	void epd_address_set(uint16_t x_start,uint16_t y_start,uint16_t x_end,uint16_t y_end);
-    void epd_setpos(uint16_t x, uint16_t y);
+    void epd_address_set(uint16_t x_start,uint16_t y_start,uint16_t x_end,uint16_t y_end);
+    void epd_setpos(epaper_t* epaper, uint16_t x, uint16_t y);
     void epd_display(uint8_t *Image1, uint8_t *Image2);
     void epd_displayBW(uint8_t *Image);
     void epd_displayBW_partial(uint8_t *Image);
