@@ -8,3 +8,6 @@ set(EXTRA_COMPONENT_DIRS
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(esp32weather)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
