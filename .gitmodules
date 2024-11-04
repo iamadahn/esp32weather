@@ -1,0 +1,4 @@
+[submodule "zephyr"]
+	path = zephyr
+	url = https://github.com/iamadahn/zephyr
+	branch = v3.7-branch
