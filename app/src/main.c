@@ -1,14 +1,21 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <time.h>
+
 #include <zephyr/kernel.h>
 #include <zephyr/net/wifi.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/net_event.h>
 #include <zephyr/net/net_mgmt.h>
 #include <zephyr/net/wifi_mgmt.h>
+#include <zephyr/net/socket.h>
 
 #define WIFI_USER_SSID  "ssid"
 #define WIFI_USER_PSK   "psk"
+
+#define API_SERVER "google.com"
+#define API_URL "80"
 
 static struct k_sem net_cb_sem;
 static struct net_mgmt_event_callback mgmt_cb;
@@ -101,6 +108,8 @@ main(void) {
     wifi_connect_params.psk_length = strlen(wifi_connect_params.psk);
     wifi_connect_params.ssid = WIFI_USER_SSID;
     wifi_connect_params.ssid_length = strlen(wifi_connect_params.ssid);
+    wifi_connect_params.band = WIFI_FREQ_BAND_2_4_GHZ;
+    wifi_connect_params.mfp = WIFI_MFP_OPTIONAL;
 
     if (net_mgmt(NET_REQUEST_WIFI_CONNECT, iface,
 			&wifi_connect_params, sizeof(struct wifi_connect_req_params))) {
@@ -117,10 +126,22 @@ main(void) {
 	printk("Connection successed\n");
 	k_msleep(100);
 
-    while (true) {
-        printk("Zephreertos wifi test: %s\n", CONFIG_BOARD);
-        k_msleep(1000);
-    }
+	struct addrinfo hints, *res;
+	int ret, sock;
 
-    return(0);
+	printk("Google HTTP GET test request - google.com:80/\n");
+	k_msleep(100);
+
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	ret = getaddrinfo(API_SERVER, API_URL, &hints, &res);
+	printk("getaddrinfo status: %d\n", ret);
+	k_msleep(100);
+
+	if (ret != 0) {
+	    printk("Unable to resolve address, quitting\n");
+		return 0;
+	}
+
+    return 0;
 }

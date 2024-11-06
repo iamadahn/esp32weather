@@ -8,3 +8,5 @@ project(hello_world)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 target_sources(app PRIVATE src/main.c)
+
+include(${ZEPHYR_BASE}/samples/net/common/common.cmake)
