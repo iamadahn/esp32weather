@@ -10,9 +10,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 target_sources(app PRIVATE src/main.c)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/wifi)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/weather)
 
 target_link_libraries(app PRIVATE
     wifi
+    weather
 )
 
 include(${ZEPHYR_BASE}/samples/net/common/common.cmake)
