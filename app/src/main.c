@@ -1,9 +1,13 @@
 #include <zephyr/kernel.h>
 
 #include "wifi/wifi.h"
+#include "weather/weather.h"
 
-#define WIFI_USER_SSID  "ssid"
-#define WIFI_USER_PSK   "psk"
+#define WIFI_USER_SSID  "your-ssid"
+#define WIFI_USER_PSK   "your-password"
+
+#define WEATHER_SERVER  "api.open-meteo.com"
+#define WEATHER_APICALL "your-api-key"
 
 int
 main(void) {
@@ -15,6 +19,8 @@ main(void) {
     } else {
         printk("Succesfully connected to provided wifi station.");
     }
+    
+    weather_get(WEATHER_SERVER, WEATHER_APICALL);
 
     return 0;
 }
