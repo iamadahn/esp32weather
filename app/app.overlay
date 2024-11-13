@@ -1,3 +1,51 @@
+/ {
+	chosen {
+		zephyr,display = &st7789v_display;
+	};
+
+	mipi_dbi_display{
+		compatible = "zephyr,mipi-dbi-spi";
+		spi-dev = <&spi3>;
+		dc-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio0 16 GPIO_ACTIVE_LOW>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		st7789v_display: st7789v@0 {
+			compatible = "sitronix,st7789v";
+			mipi-max-frequency = <20000000>;
+			reg = <0>;
+			width = <320>;
+			height = <240>;
+            x-offset = <0>;
+            y-offset = <0>;
+            vcom = <0x2b>;
+            gctrl = <0x35>;
+            vrhs = <0x0f>;
+            vdvs = <0x20>;
+            mdac = <0x60>;
+            gamma = <0x01>;
+            colmod = <0x55>;
+            lcm = <0x2c>;
+            porch-param = [0c 0c 00 33 33];
+            cmd2en-param = [5a 69 02 01];
+            pwctrl1-param = [52 a1];
+            pvgam-param = [D0 00 02 07 0B 1A 31 54 40 29 12 12 12 17];
+            nvgam-param = [D0 00 02 07 05 15 2D 44 44 1C 18 16 1C 1D];
+            ram-param = [00 F8];
+            rgb-param = [CD 08 14];
+            mipi-mode = <0x02>;
+            inversion-off;
+		};
+	};
+};
+
+&spi3 {
+    compatible = "espressif,esp32-spi";
+    status = "okay";
+    pinctrl-0 = <&spim3_default>;
+};
+
 &wifi {
 	status = "okay";
 };

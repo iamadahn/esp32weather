@@ -2,6 +2,7 @@
 
 #include "wifi/wifi.h"
 #include "weather/weather.h"
+#include "display/display.h"
 
 #define WIFI_USER_SSID  "your-ssid"
 #define WIFI_USER_PSK   "your-password"
@@ -21,6 +22,8 @@ main(void) {
     }
     
     weather_get(WEATHER_SERVER, WEATHER_APICALL);
+
+    display_init();
 
     return 0;
 }

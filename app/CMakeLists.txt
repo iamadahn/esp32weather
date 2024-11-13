@@ -11,10 +11,12 @@ target_sources(app PRIVATE src/main.c)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/wifi)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/weather)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/display)
 
 target_link_libraries(app PRIVATE
     wifi
     weather
+    display
 )
 
 include(${ZEPHYR_BASE}/samples/net/common/common.cmake)
