@@ -1,5 +1,5 @@
-#ifndef EPAPER_H_
-#define EPAPER_H_
+#ifndef DISPLAY_H_
+#define DISPLAY_H_ 
 
 int display_init(void);
 
