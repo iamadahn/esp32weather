@@ -1,4 +1,5 @@
-#include "weather.h"
+#include "forecast.h"
+#include "wifi.h"
 
 #include <zephyr/kernel.h>
 #include <zephyr/net/socket.h>
@@ -8,6 +9,12 @@
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/tls_credentials.h>
 #include <zephyr/net/http/client.h>
+
+#define WIFI_USER_SSID  "your-ssid"
+#define WIFI_USER_PSK   "your-psk"
+
+#define FORECAST_SERVER  "api.open-meteo.com"
+#define FORECAST_APICALL "your-api-key"
 
 LOG_MODULE_REGISTER(weather);
 
@@ -61,7 +68,7 @@ static void response_cb(struct http_response *response, enum http_final_call fin
         LOG_INF("GET response status - %s.", response->http_status);
 }
 
-int weather_get(const char *server, const char *api_key)
+static int forecast_get(const char *server, const char *api_key)
 {
     int sock;
     struct sockaddr_in addr;
@@ -88,4 +95,21 @@ int weather_get(const char *server, const char *api_key)
     zsock_close(sock);
 
     return ret;
+}
+
+void forecast_handler(void *, void *, void *) {
+    int ret = wifi_connect(WIFI_USER_SSID, WIFI_USER_PSK);
+
+    if (ret != 0) {
+        printk("Failed to connect to provided wifi station.");
+        return 1;
+    } else {
+        printk("Succesfully connected to provided wifi station.");
+    }
+
+    forecast_get(FORECAST_SERVER, FORECAST_APICALL);
+
+    while (true) {
+        k_msleep(100);
+    }
 }

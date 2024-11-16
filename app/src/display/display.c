@@ -51,7 +51,7 @@ static void lv_btn_click_callback(lv_event_t *e)
 	count = 0;
 }
 
-int display_init(void)
+void display_handler(void *, void *, void *)
 {
 	char count_str[11] = {0};
 	const struct device *display_dev;
@@ -61,7 +61,7 @@ int display_init(void)
 	display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 	if (!device_is_ready(display_dev)) {
 		LOG_ERR("Device not ready, aborting test");
-		return 0;
+		return;
 	}
 
 #ifdef CONFIG_GPIO
@@ -71,7 +71,7 @@ int display_init(void)
 		err = gpio_pin_configure_dt(&button_gpio, GPIO_INPUT);
 		if (err) {
 			LOG_ERR("failed to configure button gpio: %d", err);
-			return 0;
+			return;
 		}
 
 		gpio_init_callback(&button_callback, button_isr_callback,
@@ -80,14 +80,14 @@ int display_init(void)
 		err = gpio_add_callback(button_gpio.port, &button_callback);
 		if (err) {
 			LOG_ERR("failed to add button callback: %d", err);
-			return 0;
+			return;
 		}
 
 		err = gpio_pin_interrupt_configure_dt(&button_gpio,
 						      GPIO_INT_EDGE_TO_ACTIVE);
 		if (err) {
 			LOG_ERR("failed to enable button callback: %d", err);
-			return 0;
+			return;
 		}
 	}
 #endif /* CONFIG_GPIO */

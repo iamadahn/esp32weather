@@ -1,29 +1,29 @@
 #include <zephyr/kernel.h>
 
-#include "wifi/wifi.h"
-#include "weather/weather.h"
+#include "forecast/forecast.h"
 #include "display/display.h"
 
-#define WIFI_USER_SSID  "your-ssid"
-#define WIFI_USER_PSK   "your-password"
+K_THREAD_STACK_DEFINE(display_thread_stack_area, 4096);
+struct k_thread display_thread_data;
 
-#define WEATHER_SERVER  "api.open-meteo.com"
-#define WEATHER_APICALL "your-api-key"
+K_THREAD_STACK_DEFINE(forecast_thread_stack_area, 4096);
+struct k_thread forecast_thread_data;
 
 int
 main(void) {
-    int ret = wifi_connect(WIFI_USER_SSID, WIFI_USER_PSK);
+    k_tid_t display_tid = k_thread_create(&display_thread_data,
+                                          display_thread_stack_area,
+                                          K_THREAD_STACK_SIZEOF(display_thread_stack_area),
+                                          display_handler,
+                                          NULL, NULL, NULL,
+                                          5, 0, K_NO_WAIT);
 
-    if (ret != 0) {
-        printk("Failed to connect to provided wifi station.");
-        return 1;
-    } else {
-        printk("Succesfully connected to provided wifi station.");
-    }
-    
-    weather_get(WEATHER_SERVER, WEATHER_APICALL);
-
-    display_init();
+    k_tid_t forecast_tid = k_thread_create(&forecast_thread_data,
+                                          forecast_thread_stack_area,
+                                          K_THREAD_STACK_SIZEOF(forecast_thread_stack_area),
+                                          forecast_handler,
+                                          NULL, NULL, NULL,
+                                          5, 0, K_NO_WAIT);
 
     return 0;
 }
