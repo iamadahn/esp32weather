@@ -8,6 +8,14 @@
         input = <&xpt2046>;
     };
 
+    backlight_pin {
+        compatible = "backlight-pin";
+        backlight_pin: backlight {
+            gpios = <&gpio0 17 GPIO_ACTIVE_HIGH>;
+            label = "backlight";
+        };
+    };
+
 	mipi_dbi_display{
 		compatible = "zephyr,mipi-dbi-spi";
 		spi-dev = <&spi3>;
@@ -43,6 +51,10 @@
             inversion-off;
 		};
 	};
+
+    aliases {
+        backlight = &backlight_pin;
+    };
 };
 
 &spi2 {

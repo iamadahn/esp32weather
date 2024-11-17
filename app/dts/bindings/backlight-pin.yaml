@@ -1,0 +1,15 @@
+description:
+  backlight pin
+
+compatible: "backlight-pin"
+
+child-binding:
+  description: Display backlight GPIO pin.
+  properties:
+    gpios:
+      type: phandle-array
+      required: true
+    label:
+      type: string
+      description: |
+        Human readable string describing display backlight GPIO pin.
