@@ -14,6 +14,8 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(app);
 
+LV_IMG_DECLARE(wife);
+
 static uint32_t count;
 
 static void lv_btn_click_callback(lv_event_t *e)
@@ -44,7 +46,7 @@ void display_handler(void *, void *, void *)
 		lv_obj_t *hello_world_button;
 
 		hello_world_button = lv_btn_create(lv_scr_act());
-		lv_obj_align(hello_world_button, LV_ALIGN_CENTER, 0, -15);
+		lv_obj_align(hello_world_button, LV_ALIGN_CENTER, 0, 45);
 		lv_obj_add_event_cb(hello_world_button, lv_btn_click_callback, LV_EVENT_CLICKED,
 				    NULL);
 		hello_world_label = lv_label_create(hello_world_button);
@@ -60,6 +62,11 @@ void display_handler(void *, void *, void *)
 
 	lv_task_handler();
 	display_blanking_off(display_dev);
+
+    lv_obj_t *wife_img;
+    wife_img = lv_img_create(lv_scr_act());
+    lv_img_set_src(wife_img, &wife);
+    lv_obj_align(wife_img, LV_ALIGN_TOP_LEFT, 0, 0);
 
 	while (1) {
 		if ((count % 100) == 0U) {
