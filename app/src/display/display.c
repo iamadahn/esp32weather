@@ -4,6 +4,7 @@
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/display.h>
 #include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/sensor.h>
 #include <lvgl.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +14,8 @@
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(app);
+
+extern struct k_msgq temperature_msgq, humidity_msgq;
 
 LV_IMG_DECLARE(wife);
 
@@ -127,6 +130,18 @@ void display_handler(void *, void *, void *)
     lv_obj_align(wife_img, LV_ALIGN_LEFT_MID, 0, 20);
 
 	while (1) {
+        struct sensor_value temperature, humidity;
+
+        int ret = k_msgq_peek(&temperature_msgq, &temperature);
+        if (ret != 0) {
+            LOG_ERR("Failed to get temperature data from the queue: %d", ret);
+        }
+
+        ret = k_msgq_peek(&humidity_msgq, &humidity);
+        if (ret != 0) {
+            LOG_ERR("Failed to get humidity data from the queue: %d", ret);
+        }
+
 		if ((count % 100) == 0U) {
 			sprintf(count_str, "%d", count/100U);
 			lv_label_set_text(count_label, count_str);

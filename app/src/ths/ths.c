@@ -6,6 +6,9 @@
 
 LOG_MODULE_REGISTER(ths);
 
+K_MSGQ_DEFINE(temperature_msgq, sizeof(struct sensor_value), 1, 1);
+K_MSGQ_DEFINE(humidity_msgq, sizeof(struct sensor_value), 1, 1);
+
 void ths_handler(void *, void *, void *)
 {
     const struct device *const aht30 = DEVICE_DT_GET_ONE(aosong_aht20);
@@ -37,6 +40,14 @@ void ths_handler(void *, void *, void *)
            LOG_ERR("Failed to get humidity data: %d", ret);
            failure_detected = true;
         } 
+
+        while (k_msgq_put(&temperature_msgq, &temperature, K_NO_WAIT) != 0) {
+            k_msgq_purge(&temperature_msgq);
+        }
+
+        while (k_msgq_put(&humidity_msgq, &humidity, K_NO_WAIT) != 0) {
+            k_msgq_purge(&humidity_msgq);
+        }
 
         if (failure_detected) {
             k_msleep(5000);
