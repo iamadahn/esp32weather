@@ -84,6 +84,14 @@
     pinctrl-0 = <&spim3_default>;
 };
 
+&i2c0 {
+    aht20: aht20@38 {
+        compatible = "aosong,aht20";
+        reg = <0x38>;
+        status = "okay";
+    };
+};
+
 &wifi {
 	status = "okay";
 };

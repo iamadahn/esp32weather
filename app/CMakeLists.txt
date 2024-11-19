@@ -11,10 +11,12 @@ target_sources(app PRIVATE src/main.c)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/forecast)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/display)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/ths)
 
 target_link_libraries(app PRIVATE
     forecast
     display
+    ths
 )
 
 include(${ZEPHYR_BASE}/samples/net/common/common.cmake)
