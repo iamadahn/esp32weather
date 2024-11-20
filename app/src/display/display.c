@@ -25,48 +25,36 @@ static void lv_btn_click_callback(lv_event_t *e)
 {
 	ARG_UNUSED(e);
 
-	count = 0;
+	LOG_INF("Button clicked.");
 }
 
 void display_handler(void *, void *, void *)
 {
-    const struct gpio_dt_spec backlight = GPIO_DT_SPEC_GET(DT_ALIAS(backlight), gpios);
-    gpio_pin_configure_dt(&backlight, GPIO_OUTPUT_ACTIVE);
-    gpio_pin_set_dt(&backlight, true);
-
-	char count_str[11] = {0};
-	const struct device *display_dev;
-	lv_obj_t *hello_world_label;
-	lv_obj_t *count_label;
+    const struct device *display_dev;
 
 	display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 	if (!device_is_ready(display_dev)) {
 		LOG_ERR("Device not ready, aborting test");
 		return;
 	}
-
-	if (IS_ENABLED(CONFIG_LV_Z_POINTER_INPUT)) {
-		lv_obj_t *hello_world_button;
-
-		hello_world_button = lv_btn_create(lv_scr_act());
-		lv_obj_align(hello_world_button, LV_ALIGN_BOTTOM_LEFT, 5, -5);
-		lv_obj_add_event_cb(hello_world_button, lv_btn_click_callback, LV_EVENT_CLICKED,
-				    NULL);
-		hello_world_label = lv_label_create(hello_world_button);
-	} else {
-		hello_world_label = lv_label_create(lv_scr_act());
-	}
-
-	lv_label_set_text(hello_world_label, "Hello world!");
-	lv_obj_align(hello_world_label, LV_ALIGN_CENTER, 0, 0);
-
-	count_label = lv_label_create(lv_scr_act());
-	lv_obj_align(count_label, LV_ALIGN_BOTTOM_MID, 20, -10);
-
-	lv_task_handler();
-	display_blanking_off(display_dev);
+    
+    const struct gpio_dt_spec display_backlight = GPIO_DT_SPEC_GET(DT_ALIAS(backlight), gpios);
+    gpio_pin_configure_dt(&display_backlight, GPIO_OUTPUT_ACTIVE);
+    gpio_pin_set_dt(&display_backlight, true);
 
     /*----------------*/
+
+	lv_obj_t *right_button;
+	right_button = lv_btn_create(lv_scr_act());
+	lv_obj_align(right_button, LV_ALIGN_BOTTOM_RIGHT, -5, -5);
+	lv_obj_add_event_cb(right_button, lv_btn_click_callback, LV_EVENT_CLICKED, NULL);
+    
+	lv_obj_t *right_button_label;
+	right_button_label = lv_label_create(right_button);
+	lv_label_set_text(right_button_label, LV_SYMBOL_RIGHT);
+	lv_obj_align(right_button_label, LV_ALIGN_CENTER, 0, 0);
+
+	/*----------------*/
 
     lv_obj_t *date_label;
     date_label = lv_label_create(lv_scr_act());
@@ -124,10 +112,26 @@ void display_handler(void *, void *, void *)
     
     /*----------------*/
 
-    lv_obj_t *wife_img;
-    wife_img = lv_img_create(lv_scr_act());
-    lv_img_set_src(wife_img, &wife);
-    lv_obj_align(wife_img, LV_ALIGN_LEFT_MID, 0, 20);
+    lv_obj_t *weather_logo_img;
+    weather_logo_img = lv_img_create(lv_scr_act());
+    lv_img_set_src(weather_logo_img, &wife);
+    lv_obj_align(weather_logo_img, LV_ALIGN_LEFT_MID, 0, 20);
+
+    lv_obj_t *wind_logo_img;
+    wind_logo_img = lv_img_create(lv_scr_act());
+    lv_img_set_src(wind_logo_img, &wife);
+    lv_obj_align(wind_logo_img, LV_ALIGN_LEFT_MID, 84, 20);
+
+    lv_obj_t *hmdty_logo_img;
+    hmdty_logo_img = lv_img_create(lv_scr_act());
+    lv_img_set_src(hmdty_logo_img, &wife);
+    lv_obj_align(hmdty_logo_img, LV_ALIGN_LEFT_MID, 168, 20);
+
+    /*----------------*/
+    
+    lv_task_handler();
+	display_blanking_off(display_dev);
+
 
 	while (1) {
         struct sensor_value temperature, humidity;
@@ -136,18 +140,17 @@ void display_handler(void *, void *, void *)
         if (ret != 0) {
             LOG_ERR("Failed to get temperature data from the queue: %d", ret);
         }
+        sprintf(temp_inside_data_str, "%.1f", sensor_value_to_double(&temperature));
+        lv_label_set_text(temp_inside_data_label, temp_inside_data_str);
 
         ret = k_msgq_peek(&humidity_msgq, &humidity);
         if (ret != 0) {
             LOG_ERR("Failed to get humidity data from the queue: %d", ret);
         }
+        sprintf(hmdty_inside_data_str, "%.1f", sensor_value_to_double(&humidity));
+        lv_label_set_text(hmdty_inside_data_label, hmdty_inside_data_str);
 
-		if ((count % 100) == 0U) {
-			sprintf(count_str, "%d", count/100U);
-			lv_label_set_text(count_label, count_str);
-		}
 		lv_task_handler();
-		++count;
 		k_sleep(K_MSEC(10));
 	}
 }
