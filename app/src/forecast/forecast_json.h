@@ -1,5 +1,5 @@
 #ifndef FORECAST_JSON_H_
-#define FORECAST_JSON_H
+#define FORECAST_JSON_H_
 
 #include <zephyr/data/json.h>
 
