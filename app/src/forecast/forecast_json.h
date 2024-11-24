@@ -31,16 +31,6 @@ struct current {
 
     int weather_code;
     float wind_speed_10m;
-
-    size_t time_len;
-    size_t interval_len;
-    size_t temperature_2m_len;
-    size_t relative_humidity_2m_len;
-    size_t apparent_temperature_len;
-    size_t precipitation_len;
-    size_t rain_len;
-    size_t weather_code_len;
-    size_t wind_speed_10m_len;
 };
 
 struct daily_units {
@@ -52,17 +42,11 @@ struct daily_units {
 };
 
 struct daily {
-    const char time[2];
-    float temperature_2m_max[2];
-    float temperature_2m_min[2];
-    float apparent_temperature_max[2];
-    float apparent_temperature_min[2];
-
-    size_t time_len;
-    size_t temperature_2m_max_len;
-    size_t temperature_2m_min_len;
-    size_t apparent_temperature_max_len;
-    size_t apparent_temperature_min_len;
+    const char time;
+    float temperature_2m_max;
+    float temperature_2m_min;
+    float apparent_temperature_max;
+    float apparent_temperature_min;
 };
 
 struct forecast_data {
@@ -92,15 +76,15 @@ const struct json_obj_descr current_units_descr[] = {
 };
 
 const struct json_obj_descr current_descr[] = {
-    JSON_OBJ_DESCR_ARRAY(struct current, time, 1, time_len, JSON_TOK_STRING),
-    JSON_OBJ_DESCR_ARRAY(struct current, interval, 1, interval_len, JSON_TOK_NUMBER),
-    JSON_OBJ_DESCR_ARRAY(struct current, temperature_2m, 1, temperature_2m_len, JSON_TOK_FLOAT),
-    JSON_OBJ_DESCR_ARRAY(struct current, relative_humidity_2m, 1, relative_humidity_2m_len, JSON_TOK_NUMBER),
-    JSON_OBJ_DESCR_ARRAY(struct current, apparent_temperature, 1, apparent_temperature_len, JSON_TOK_FLOAT),
-    JSON_OBJ_DESCR_ARRAY(struct current, precipitation, 1, precipitation_len, JSON_TOK_NUMBER),
-    JSON_OBJ_DESCR_ARRAY(struct current, rain, 1, rain_len, JSON_TOK_NUMBER),
-    JSON_OBJ_DESCR_ARRAY(struct current, weather_code, 1, weather_code_len, JSON_TOK_NUMBER),
-    JSON_OBJ_DESCR_ARRAY(struct current, wind_speed_10m, 1, wind_speed_10m_len, JSON_TOK_FLOAT),
+    JSON_OBJ_DESCR_PRIM(struct current, time, JSON_TOK_STRING),
+    JSON_OBJ_DESCR_PRIM(struct current, interval, JSON_TOK_NUMBER),
+    JSON_OBJ_DESCR_PRIM(struct current, temperature_2m, JSON_TOK_FLOAT),
+    JSON_OBJ_DESCR_PRIM(struct current, relative_humidity_2m, JSON_TOK_NUMBER),
+    JSON_OBJ_DESCR_PRIM(struct current, apparent_temperature, JSON_TOK_FLOAT),
+    JSON_OBJ_DESCR_PRIM(struct current, precipitation, JSON_TOK_NUMBER),
+    JSON_OBJ_DESCR_PRIM(struct current, rain, JSON_TOK_NUMBER),
+    JSON_OBJ_DESCR_PRIM(struct current, weather_code, JSON_TOK_NUMBER),
+    JSON_OBJ_DESCR_PRIM(struct current, wind_speed_10m, JSON_TOK_FLOAT),
 };
 
 const struct json_obj_descr daily_units_descr[] = {
@@ -112,11 +96,11 @@ const struct json_obj_descr daily_units_descr[] = {
 };
 
 const struct json_obj_descr daily_descr[] = {
-    JSON_OBJ_DESCR_ARRAY(struct daily, time, 2, time_len, JSON_TOK_STRING),
-    JSON_OBJ_DESCR_ARRAY(struct daily, temperature_2m_max, 2, temperature_2m_max_len, JSON_TOK_FLOAT),
-    JSON_OBJ_DESCR_ARRAY(struct daily, temperature_2m_min, 2, temperature_2m_min_len, JSON_TOK_FLOAT),
-    JSON_OBJ_DESCR_ARRAY(struct daily, apparent_temperature_max, 2, apparent_temperature_max_len, JSON_TOK_FLOAT),
-    JSON_OBJ_DESCR_ARRAY(struct daily, apparent_temperature_min, 2, apparent_temperature_min_len, JSON_TOK_FLOAT),
+    JSON_OBJ_DESCR_PRIM(struct daily, time, JSON_TOK_STRING),
+    JSON_OBJ_DESCR_PRIM(struct daily, temperature_2m_max, JSON_TOK_FLOAT),
+    JSON_OBJ_DESCR_PRIM(struct daily, temperature_2m_min, JSON_TOK_FLOAT),
+    JSON_OBJ_DESCR_PRIM(struct daily, apparent_temperature_max, JSON_TOK_FLOAT),
+    JSON_OBJ_DESCR_PRIM(struct daily, apparent_temperature_min, JSON_TOK_FLOAT),
 
 };
 
