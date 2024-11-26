@@ -29,15 +29,14 @@ static void net_mgmt_event_callback_handler(struct net_mgmt_event_callback *cb,
     }
 
     for (int i = 0; i < NET_IF_MAX_IPV4_ADDR; i++) {
-		char buf[NET_IPV4_ADDR_LEN];
+        char buf[NET_IPV4_ADDR_LEN];
 
-		if (iface->config.ip.ipv4->unicast[i].ipv4.addr_type !=
-							NET_ADDR_DHCP) {
-			continue;
-		}
-	}
+        if (iface->config.ip.ipv4->unicast[i].ipv4.addr_type != NET_ADDR_DHCP) {
+            continue;
+        }
+    }
 
-	k_sem_give(&net_cb_sem);
+    k_sem_give(&net_cb_sem);
 }
 
 int wifi_connect(const void* ssid, const void* psk)
@@ -54,35 +53,39 @@ int wifi_connect(const void* ssid, const void* psk)
 
     struct net_if *iface = net_if_get_default();
 
-	if(iface == NULL){
-		LOG_ERR("iface is NULL");
-		return 1;
-	}
+    if(iface == NULL){
+        LOG_ERR("iface is NULL");
+        return 1;
+    }
 
-	if (net_if_flag_is_set(iface, NET_IF_UP)) {
-			LOG_INF("Net if is already up");
-	} else {
-		uint32_t raised_event;
-		const void *info;
-		size_t info_len;
+    if (net_if_flag_is_set(iface, NET_IF_UP)) {
+        LOG_INF("Net if is already up");
+    } else {
+        uint32_t raised_event;
+        const void *info;
+        size_t info_len;
 
-		LOG_INF("Waiting for net if being up");
-		int ret = net_mgmt_event_wait_on_iface(net_if_get_default(),
-						NET_EVENT_IF_UP, &raised_event, &info,
-						&info_len, K_SECONDS(60));
+        LOG_INF("Waiting for net if being up");
+        int ret = net_mgmt_event_wait_on_iface(net_if_get_default(),
+						                       NET_EVENT_IF_UP,
+                                               &raised_event,
+                                               &info,
+						                       &info_len,
+                                               K_SECONDS(60));
 
-		if (ret != 0) {
-			LOG_ERR("Timeout: Net if cannot bring up");
-			return 1;
-		} else {
-			LOG_INF("Netif is up");
-		}
-	}
+        if (ret != 0) {
+            LOG_ERR("Timeout: Net if cannot bring up");
+            return 1;
+        } else {
+            LOG_INF("Netif is up");
+        }
+    }
 
-	net_mgmt_init_event_callback(&mgmt_cb, net_mgmt_event_callback_handler,
-				     NET_EVENT_IPV4_ADDR_ADD);
+    net_mgmt_init_event_callback(&mgmt_cb,
+                                 net_mgmt_event_callback_handler,
+				                 NET_EVENT_IPV4_ADDR_ADD);
 
-	net_mgmt_add_event_callback(&mgmt_cb);
+    net_mgmt_add_event_callback(&mgmt_cb);
 
     struct wifi_connect_req_params wifi_connect_params;
     wifi_connect_params.security = WIFI_SECURITY_TYPE_PSK;
@@ -94,19 +97,20 @@ int wifi_connect(const void* ssid, const void* psk)
     wifi_connect_params.band = WIFI_FREQ_BAND_2_4_GHZ;
     wifi_connect_params.mfp = WIFI_MFP_OPTIONAL;
 
-    if (net_mgmt(NET_REQUEST_WIFI_CONNECT, iface,
-			&wifi_connect_params, sizeof(struct wifi_connect_req_params))) {
-		LOG_ERR("Connection failed.");
-		return 1;
-	} else {
-		LOG_INF("Connection requested.");
-
-		k_sem_take(&net_cb_sem, K_FOREVER );
-	}
+    if (net_mgmt(NET_REQUEST_WIFI_CONNECT,
+                 iface,
+                 &wifi_connect_params,
+                 sizeof(struct wifi_connect_req_params))) {
+        LOG_ERR("Connection failed.");
+        return 1;
+    } else {
+        LOG_INF("Connection requested.");
+        k_sem_take(&net_cb_sem, K_FOREVER );
+    }
 
 	LOG_INF("Connection successed.");
 
-	struct addrinfo hints, *res;
+    struct addrinfo hints, *res;
     int sock;
 
     LOG_INF("Google HTTP GET test request - google.com:80/\n");
