@@ -1,7 +1,7 @@
 / {
-	chosen {
-		zephyr,display = &st7789v_display;
-	};
+    chosen {
+        zephyr,display = &st7789v_display;
+    };
 
     lvgl_pointer {
         compatible = "zephyr,lvgl-pointer-input";
@@ -18,20 +18,20 @@
         };
     };
 
-	mipi_dbi_display{
-		compatible = "zephyr,mipi-dbi-spi";
-		spi-dev = <&spi3>;
-		dc-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
-		reset-gpios = <&gpio0 16 GPIO_ACTIVE_LOW>;
-		#address-cells = <1>;
-		#size-cells = <0>;
+    mipi_dbi_display{
+        compatible = "zephyr,mipi-dbi-spi";
+        spi-dev = <&spi3>;
+        dc-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+        reset-gpios = <&gpio0 16 GPIO_ACTIVE_LOW>;
+        #address-cells = <1>;
+        #size-cells = <0>;
 
-		st7789v_display: st7789v@0 {
-			compatible = "sitronix,st7789v";
-			mipi-max-frequency = <20000000>;
-			reg = <0>;
-			width = <320>;
-			height = <240>;
+        st7789v_display: st7789v@0 {
+            compatible = "sitronix,st7789v";
+            mipi-max-frequency = <20000000>;
+            reg = <0>;
+            width = <320>;
+            height = <240>;
             x-offset = <0>;
             y-offset = <0>;
             vcom = <0x2b>;
@@ -51,8 +51,8 @@
             rgb-param = [CD 08 14];
             mipi-mode = <0x02>;
             inversion-off;
-		};
-	};
+        };
+    };
 
     aliases {
         backlight = &backlight_pin;
@@ -93,5 +93,5 @@
 };
 
 &wifi {
-	status = "okay";
+    status = "okay";
 };

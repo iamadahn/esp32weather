@@ -23,19 +23,19 @@ static uint32_t count;
 
 static void lv_btn_click_callback(lv_event_t *e)
 {
-	ARG_UNUSED(e);
+    ARG_UNUSED(e);
 
-	LOG_INF("Button clicked.");
+    LOG_INF("Button clicked.");
 }
 
 void display_handler(void *, void *, void *)
 {
     const struct device *display_dev;
 
-	display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
-	if (!device_is_ready(display_dev)) {
-		LOG_ERR("Device not ready, aborting test");
-		return;
+    display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
+    if (!device_is_ready(display_dev)) {
+        LOG_ERR("Device not ready, aborting test");
+        return;
 	}
     
     const struct gpio_dt_spec display_backlight = GPIO_DT_SPEC_GET(DT_ALIAS(backlight), gpios);
@@ -44,17 +44,17 @@ void display_handler(void *, void *, void *)
 
     /*----------------*/
 
-	lv_obj_t *right_button;
-	right_button = lv_btn_create(lv_scr_act());
-	lv_obj_align(right_button, LV_ALIGN_BOTTOM_RIGHT, -5, -5);
-	lv_obj_add_event_cb(right_button, lv_btn_click_callback, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *right_button;
+    right_button = lv_btn_create(lv_scr_act());
+    lv_obj_align(right_button, LV_ALIGN_BOTTOM_RIGHT, -5, -5);
+    lv_obj_add_event_cb(right_button, lv_btn_click_callback, LV_EVENT_CLICKED, NULL);
     
-	lv_obj_t *right_button_label;
-	right_button_label = lv_label_create(right_button);
-	lv_label_set_text(right_button_label, LV_SYMBOL_RIGHT);
-	lv_obj_align(right_button_label, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_t *right_button_label;
+    right_button_label = lv_label_create(right_button);
+    lv_label_set_text(right_button_label, LV_SYMBOL_RIGHT);
+    lv_obj_align(right_button_label, LV_ALIGN_CENTER, 0, 0);
 
-	/*----------------*/
+    /*----------------*/
 
     lv_obj_t *date_label;
     date_label = lv_label_create(lv_scr_act());
@@ -130,10 +130,10 @@ void display_handler(void *, void *, void *)
     /*----------------*/
     
     lv_task_handler();
-	display_blanking_off(display_dev);
+    display_blanking_off(display_dev);
 
 
-	while (1) {
+    while (1) {
         struct sensor_value temperature, humidity;
 
         int ret = k_msgq_peek(&temperature_msgq, &temperature);
@@ -150,7 +150,7 @@ void display_handler(void *, void *, void *)
         sprintf(hmdty_inside_data_str, "%.1f", sensor_value_to_double(&humidity));
         lv_label_set_text(hmdty_inside_data_label, hmdty_inside_data_str);
 
-		lv_task_handler();
-		k_sleep(K_MSEC(10));
-	}
+        lv_task_handler();
+        k_sleep(K_MSEC(10));
+    }
 }
