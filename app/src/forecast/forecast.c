@@ -15,7 +15,7 @@
 #define WIFI_USER_PSK   "your_psk"
 
 #define FORECAST_SERVER  "api.open-meteo.com"
-#define FORECAST_APICALL "your_api_key"
+#define FORECAST_APICALL "your_apicall"
 
 LOG_MODULE_REGISTER(weather);
 
@@ -33,19 +33,19 @@ static int socket_setup(const char* server, const char* port, int *sock);
 static int forecast_response_parse(char *response)
 {
     int ret = json_obj_parse(response,
-                             sizeof(response) - 1, 
+                             strlen(response), 
                              forecast_data_descr,
                              ARRAY_SIZE(forecast_data_descr),
                              &forecast);
 
-    if (ret <= 0) {
+   if (ret <= 0) {
         LOG_ERR("Failed to parse json data. - %d", ret);
     } else {
         LOG_INF("Succesfully parsed json data.");
     }
-
-    LOG_INF("%f:%f", (double)forecast.latitude, (double)forecast.longitude);
-
+    
+    /* idk why json_obj_parse(...) returns error with -22, although data is seems to be parsed correctly */
+    LOG_INF("%f:%f:%s:%s:%f:%d", (double)forecast.latitude, (double)forecast.longitude, forecast.timezone, forecast.timezone_abbreviation, (double)forecast.current.temperature_2m, forecast.current.relative_humidity_2m); 
     return ret;
 }
 
@@ -59,7 +59,8 @@ static void response_cb(struct http_response *response, enum http_final_call fin
 
     LOG_INF("GET response status - %s.", response->http_status);
 
-    printk(strchr(response->recv_buf, '{'));
+    printk(response->recv_buf);
+    k_msleep(1000);
     forecast_response_parse(strchr(response->recv_buf, '{'));
 }
 

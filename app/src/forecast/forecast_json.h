@@ -112,6 +112,8 @@ const struct json_obj_descr forecast_data_descr[] = {
     JSON_OBJ_DESCR_PRIM(struct forecast_data, timezone, JSON_TOK_STRING),
     JSON_OBJ_DESCR_PRIM(struct forecast_data, timezone_abbreviation, JSON_TOK_STRING),
     JSON_OBJ_DESCR_PRIM(struct forecast_data, elevation, JSON_TOK_FLOAT),
+    JSON_OBJ_DESCR_OBJECT(struct forecast_data, current_units, current_units_descr),
+    JSON_OBJ_DESCR_OBJECT(struct forecast_data, current, current_descr),
 };
 
 #endif
