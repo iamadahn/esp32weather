@@ -6,8 +6,8 @@
 
 LOG_MODULE_REGISTER(ths);
 
-K_MSGQ_DEFINE(temperature_msgq, sizeof(struct sensor_value), 1, 1);
-K_MSGQ_DEFINE(humidity_msgq, sizeof(struct sensor_value), 1, 1);
+K_MSGQ_DEFINE(temperature_inside_msgq, sizeof(struct sensor_value), 1, 1);
+K_MSGQ_DEFINE(humidity_inside_msgq, sizeof(struct sensor_value), 1, 1);
 
 void ths_handler(void *, void *, void *)
 {
@@ -27,26 +27,26 @@ void ths_handler(void *, void *, void *)
            failure_detected = true;
         }
 
-        struct sensor_value temperature, humidity;
+        struct sensor_value temperature_inside, humidity_inside;
 
-        ret = sensor_channel_get(aht30, SENSOR_CHAN_AMBIENT_TEMP, &temperature);
+        ret = sensor_channel_get(aht30, SENSOR_CHAN_AMBIENT_TEMP, &temperature_inside);
         if (ret != 0) {
            LOG_ERR("Failed to get temperature data: %d", ret);
            failure_detected = true;
         }
 
-        ret = sensor_channel_get(aht30, SENSOR_CHAN_HUMIDITY, &humidity);
+        ret = sensor_channel_get(aht30, SENSOR_CHAN_HUMIDITY, &humidity_inside);
         if (ret != 0) {
            LOG_ERR("Failed to get humidity data: %d", ret);
            failure_detected = true;
         } 
 
-        while (k_msgq_put(&temperature_msgq, &temperature, K_NO_WAIT) != 0) {
-            k_msgq_purge(&temperature_msgq);
+        while (k_msgq_put(&temperature_inside_msgq, &temperature_inside, K_NO_WAIT) != 0) {
+            k_msgq_purge(&temperature_inside_msgq);
         }
 
-        while (k_msgq_put(&humidity_msgq, &humidity, K_NO_WAIT) != 0) {
-            k_msgq_purge(&humidity_msgq);
+        while (k_msgq_put(&humidity_inside_msgq, &humidity_inside, K_NO_WAIT) != 0) {
+            k_msgq_purge(&humidity_inside_msgq);
         }
 
         if (failure_detected) {

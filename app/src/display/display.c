@@ -15,7 +15,7 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(app);
 
-extern struct k_msgq temperature_msgq, humidity_msgq;
+extern struct k_msgq temperature_inside_msgq, humidity_inside_msgq;
 
 LV_IMG_DECLARE(wife);
 
@@ -134,20 +134,20 @@ void display_handler(void *, void *, void *)
 
 
     while (1) {
-        struct sensor_value temperature, humidity;
+        struct sensor_value temperature_inside, humidity_inside;
 
-        int ret = k_msgq_peek(&temperature_msgq, &temperature);
+        int ret = k_msgq_peek(&temperature_inside_msgq, &temperature_inside);
         if (ret != 0) {
             LOG_ERR("Failed to get temperature data from the queue: %d", ret);
         }
-        sprintf(temp_inside_data_str, "%.1f", sensor_value_to_double(&temperature));
+        sprintf(temp_inside_data_str, "%.1f", sensor_value_to_double(&temperature_inside));
         lv_label_set_text(temp_inside_data_label, temp_inside_data_str);
 
-        ret = k_msgq_peek(&humidity_msgq, &humidity);
+        ret = k_msgq_peek(&humidity_inside_msgq, &humidity_inside);
         if (ret != 0) {
             LOG_ERR("Failed to get humidity data from the queue: %d", ret);
         }
-        sprintf(hmdty_inside_data_str, "%.1f", sensor_value_to_double(&humidity));
+        sprintf(hmdty_inside_data_str, "%.1f", sensor_value_to_double(&humidity_inside));
         lv_label_set_text(hmdty_inside_data_label, hmdty_inside_data_str);
 
         lv_task_handler();
