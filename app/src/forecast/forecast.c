@@ -19,6 +19,9 @@
 
 LOG_MODULE_REGISTER(weather);
 
+K_MSGQ_DEFINE(temperature_outside_msgq, sizeof(float), 1, 1);
+K_MSGQ_DEFINE(humidity_outside_msgq, sizeof(unsigned long), 1, 1);
+
 unsigned char recv_buf[3072];
 
 struct forecast_data forecast;
@@ -46,6 +49,15 @@ static int forecast_response_parse(char *response)
     
     /* idk why json_obj_parse(...) returns error with -22, although data is seems to be parsed correctly */
     LOG_INF("%f:%f:%s:%s:%f:%d", (double)forecast.latitude, (double)forecast.longitude, forecast.timezone, forecast.timezone_abbreviation, (double)forecast.current.temperature_2m, forecast.current.relative_humidity_2m); 
+    
+    while (k_msgq_put(&temperature_outside_msgq, &forecast.current.temperature_2m, K_NO_WAIT) != 0) {
+        k_msgq_purge(&temperature_outside_msgq);
+    }
+
+    while (k_msgq_put(&humidity_outside_msgq, &forecast.current.relative_humidity_2m, K_NO_WAIT) != 0) {
+        k_msgq_purge(&humidity_outside_msgq);
+    }
+
     return ret;
 }
 
