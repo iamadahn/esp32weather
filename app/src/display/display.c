@@ -45,7 +45,9 @@ void display_handler(void *, void *, void *)
     gpio_pin_configure_dt(&display_backlight, GPIO_OUTPUT_ACTIVE);
     gpio_pin_set_dt(&display_backlight, true);
 
-    /*----------------*/
+    /*--------------------------------------*/
+    /* The most usefull button in the world */
+    /*--------------------------------------*/
 
     lv_obj_t *right_button;
     right_button = lv_btn_create(lv_scr_act());
@@ -57,7 +59,9 @@ void display_handler(void *, void *, void *)
     lv_label_set_text(right_button_label, LV_SYMBOL_RIGHT);
     lv_obj_align(right_button_label, LV_ALIGN_CENTER, 0, 0);
 
-    /*----------------*/
+    /*------*/
+    /* Date */
+    /*------*/
 
     lv_obj_t *date_label;
     date_label = lv_label_create(lv_scr_act());
@@ -71,7 +75,9 @@ void display_handler(void *, void *, void *)
     lv_label_set_text(date_data_label, date_data_str);
     lv_obj_align(date_data_label, LV_ALIGN_TOP_LEFT, 67, 0); // literally pixel counting...
   
-    /*----------------*/
+    /*----------*/
+    /* Location */
+    /*----------*/
 
     lv_obj_t *location_label;
     location_label = lv_label_create(lv_scr_act());
@@ -85,7 +91,9 @@ void display_handler(void *, void *, void *)
     lv_label_set_text(location_data_label, location_data_str);
     lv_obj_align(location_data_label, LV_ALIGN_TOP_LEFT, 110, 25);
 
-    /*----------------*/
+    /*--------------------*/
+    /* Temperature inside */
+    /*--------------------*/
 
     lv_obj_t *temp_inside_label;
     temp_inside_label = lv_label_create(lv_scr_act());
@@ -99,7 +107,9 @@ void display_handler(void *, void *, void *)
     lv_label_set_text(temp_inside_data_label, temp_inside_data_str);
     lv_obj_align(temp_inside_data_label, LV_ALIGN_TOP_LEFT, 229, 50); // i love pixel counting
     
-    /*----------------*/
+    /*-----------------*/
+    /* Humidity inside */
+    /*-----------------*/
 
     lv_obj_t *hmdty_inside_label;
     hmdty_inside_label = lv_label_create(lv_scr_act());
@@ -113,24 +123,60 @@ void display_handler(void *, void *, void *)
     lv_label_set_text(hmdty_inside_data_label, hmdty_inside_data_str);
     lv_obj_align(hmdty_inside_data_label, LV_ALIGN_TOP_LEFT, 189, 75); // i really do
     
-    /*----------------*/
+    /*---------------------*/
+    /* Temperature outside */
+    /*---------------------*/
+
+    lv_obj_t *temp_outside_label;
+    temp_outside_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(temp_outside_label, "Temperature outside: ");
+    lv_obj_align(temp_outside_label, LV_ALIGN_TOP_LEFT, 0, 100);
+
+    lv_obj_t *temp_outside_data_label;
+    temp_outside_data_label = lv_label_create(lv_scr_act());
+    char temp_outside_data_str[16];
+    sprintf(temp_outside_data_str, "%.1f", 0.0);
+    lv_label_set_text(temp_outside_data_label, temp_outside_data_str);
+    lv_obj_align(temp_outside_data_label, LV_ALIGN_TOP_LEFT, 246, 100); // i have been given the ability to count
+    
+    /*------------------*/
+    /* Humidity outside */
+    /*------------------*/
+
+    lv_obj_t *hmdty_outside_label;
+    hmdty_outside_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(hmdty_outside_label, "Humidity outside: ");
+    lv_obj_align(hmdty_outside_label, LV_ALIGN_TOP_LEFT, 0, 125);
+
+    lv_obj_t *hmdty_outside_data_label;
+    hmdty_outside_data_label = lv_label_create(lv_scr_act());
+    char hmdty_outside_data_str[16];
+    sprintf(hmdty_outside_data_str, "%.1f", 0.0);
+    lv_label_set_text(hmdty_outside_data_label, hmdty_outside_data_str);
+    lv_obj_align(hmdty_outside_data_label, LV_ALIGN_TOP_LEFT, 206, 125); // and it won't go for nothing
+    
+    /*---------------*/
+    /* Weather logos */
+    /*---------------*/
 
     lv_obj_t *weather_logo_img;
     weather_logo_img = lv_img_create(lv_scr_act());
     lv_img_set_src(weather_logo_img, &wife);
-    lv_obj_align(weather_logo_img, LV_ALIGN_LEFT_MID, 0, 20);
+    lv_obj_align(weather_logo_img, LV_ALIGN_LEFT_MID, 0, 70);
 
     lv_obj_t *wind_logo_img;
     wind_logo_img = lv_img_create(lv_scr_act());
     lv_img_set_src(wind_logo_img, &wife);
-    lv_obj_align(wind_logo_img, LV_ALIGN_LEFT_MID, 84, 20);
+    lv_obj_align(wind_logo_img, LV_ALIGN_LEFT_MID, 84, 70);
 
     lv_obj_t *hmdty_logo_img;
     hmdty_logo_img = lv_img_create(lv_scr_act());
     lv_img_set_src(hmdty_logo_img, &wife);
-    lv_obj_align(hmdty_logo_img, LV_ALIGN_LEFT_MID, 168, 20);
+    lv_obj_align(hmdty_logo_img, LV_ALIGN_LEFT_MID, 168, 70);
 
-    /*----------------*/
+    /*-------------------------------------*/
+    /* The end of widgets creating section */
+    /*-------------------------------------*/
     
     lv_task_handler();
     display_blanking_off(display_dev);
