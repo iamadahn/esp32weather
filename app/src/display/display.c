@@ -205,11 +205,15 @@ void display_handler(void *, void *, void *)
         if (ret != 0) {
             LOG_ERR("Faield to get outside temperature data from the queue: %d", ret);
         }
+        sprintf(temp_outside_data_str, "%.1f", (double)temperature_outside);
+        lv_label_set_text(temp_outside_data_label, temp_outside_data_str);
 
         ret = k_msgq_peek(&humidity_outside_msgq, &humidity_outside);
         if (ret != 0) {
             LOG_ERR("Failed to get outside humidity data from the queue: %d", ret);
         }
+        sprintf(hmdty_outside_data_str, "%lu", humidity_outside);
+        lv_label_set_text(hmdty_outside_data_label, hmdty_outside_data_str);
 
         lv_task_handler();
         k_sleep(K_MSEC(10));
