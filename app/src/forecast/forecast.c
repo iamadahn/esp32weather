@@ -21,6 +21,7 @@ LOG_MODULE_REGISTER(weather);
 
 K_MSGQ_DEFINE(temperature_outside_msgq, sizeof(float), 1, 1);
 K_MSGQ_DEFINE(humidity_outside_msgq, sizeof(unsigned long), 1, 1);
+K_MSGQ_DEFINE(wifi_state_msgq, sizeof(unsigned short), 1, 1);
 
 unsigned char recv_buf[3072];
 
@@ -146,13 +147,19 @@ void forecast_handler(void *, void *, void *) {
     int ret = wifi_connect(WIFI_USER_SSID, WIFI_USER_PSK);
 
     if (ret != 0) {
-        LOG_INF("Failed to connect to provided wifi station.");
+        LOG_ERR("Failed to connect to provided wifi station.");
         return;
     } else {
         LOG_INF("Succesfully connected to provided wifi station.");
     }
-
+   
     forecast_get(FORECAST_SERVER, FORECAST_APICALL);
+ 
+    unsigned char wifi_state = 1;
+    ret = k_msgq_put(&wifi_state_msgq, &wifi_state, K_NO_WAIT);
+    if (ret != 0) {
+        LOG_ERR("Failed to push to wifi state queue");
+    }
 
     while (true) {
         k_msleep(100);
