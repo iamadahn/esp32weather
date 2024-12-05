@@ -11,22 +11,32 @@
 #include <zephyr/kernel.h>
 #include <lvgl_input_device.h>
 #include <zephyr/drivers/gpio.h>
-
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(app);
+
+LOG_MODULE_REGISTER(display);
 
 extern struct k_msgq temperature_inside_msgq,
                         humidity_inside_msgq,
                         temperature_outside_msgq,
+                        wifi_state_msgq,
                         humidity_outside_msgq;
 
 LV_IMG_DECLARE(wife);
 
-static uint32_t count;
+static lv_obj_t *forecast_scr, *wife_scr;
 
 static void lv_btn_click_callback(lv_event_t *e)
 {
     ARG_UNUSED(e);
+
+    lv_obj_t *scr = lv_obj_create(NULL);
+    lv_scr_load(scr);
+
+    if (lv_scr_act() == forecast_scr) {
+        lv_scr_load(wife_scr);
+    } else {
+        lv_scr_load(forecast_scr);
+    }
 
     LOG_INF("Button clicked.");
 }
@@ -45,19 +55,52 @@ void display_handler(void *, void *, void *)
     gpio_pin_configure_dt(&display_backlight, GPIO_OUTPUT_ACTIVE);
     gpio_pin_set_dt(&display_backlight, true);
 
+    /*------------------*/
+    /* Wife screen init */
+    /*------------------*/
+
+    wife_scr = lv_obj_create(NULL);
+    lv_scr_load(wife_scr);
+
+    lv_obj_t *wife_img;
+    wife_img = lv_img_create(lv_scr_act());
+    lv_img_set_src(wife_img, &wife);
+    lv_obj_align(wife_img, LV_ALIGN_TOP_LEFT, 0, 0);
+
     /*--------------------------------------*/
     /* The most usefull button in the world */
     /*--------------------------------------*/
 
-    lv_obj_t *right_button;
-    right_button = lv_btn_create(lv_scr_act());
-    lv_obj_align(right_button, LV_ALIGN_BOTTOM_RIGHT, -5, -5);
-    lv_obj_add_event_cb(right_button, lv_btn_click_callback, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *right_wife_button;
+    right_wife_button = lv_btn_create(lv_scr_act());
+    lv_obj_align(right_wife_button, LV_ALIGN_BOTTOM_RIGHT, -5, -5);
+    lv_obj_add_event_cb(right_wife_button, lv_btn_click_callback, LV_EVENT_CLICKED, NULL);
     
-    lv_obj_t *right_button_label;
-    right_button_label = lv_label_create(right_button);
-    lv_label_set_text(right_button_label, LV_SYMBOL_RIGHT);
-    lv_obj_align(right_button_label, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_t *right_wife_button_label;
+    right_wife_button_label = lv_label_create(right_wife_button);
+    lv_label_set_text(right_wife_button_label, LV_SYMBOL_RIGHT);
+    lv_obj_align(right_wife_button_label, LV_ALIGN_CENTER, 0, 0);
+
+    /*----------------------*/
+    /* Forecast screen init */
+    /*----------------------*/
+
+    forecast_scr = lv_obj_create(NULL);
+    lv_scr_load(forecast_scr);
+    
+    /*--------------------------------------*/
+    /* The most usefull button in the world */
+    /*--------------------------------------*/
+
+    lv_obj_t *right_forecast_button;
+    right_forecast_button = lv_btn_create(lv_scr_act());
+    lv_obj_align(right_forecast_button, LV_ALIGN_BOTTOM_RIGHT, -5, -5);
+    lv_obj_add_event_cb(right_forecast_button, lv_btn_click_callback, LV_EVENT_CLICKED, NULL);
+    
+    lv_obj_t *right_forecast_button_label;
+    right_forecast_button_label = lv_label_create(right_forecast_button);
+    lv_label_set_text(right_forecast_button_label, LV_SYMBOL_RIGHT);
+    lv_obj_align(right_forecast_button_label, LV_ALIGN_CENTER, 0, 0);
 
     /*------*/
     /* Date */
@@ -181,6 +224,15 @@ void display_handler(void *, void *, void *)
     lv_task_handler();
     display_blanking_off(display_dev);
 
+    unsigned char wifi_state = 0;
+    while (k_msgq_peek(&wifi_state_msgq, &wifi_state) != 0) {
+        k_sleep(K_MSEC(100));
+    }
+
+    if (wifi_state != 1) {
+        LOG_ERR("Faield to get wifi state, aborting.");
+        return;
+    }
 
     while (1) {
         float temperature_outside;
@@ -203,7 +255,7 @@ void display_handler(void *, void *, void *)
 
         ret = k_msgq_peek(&temperature_outside_msgq, &temperature_outside);
         if (ret != 0) {
-            LOG_ERR("Faield to get outside temperature data from the queue: %d", ret);
+            LOG_ERR("Failed to get outside temperature data from the queue: %d", ret);
         }
         sprintf(temp_outside_data_str, "%.1f", (double)temperature_outside);
         lv_label_set_text(temp_outside_data_label, temp_outside_data_str);
@@ -216,6 +268,6 @@ void display_handler(void *, void *, void *)
         lv_label_set_text(hmdty_outside_data_label, hmdty_outside_data_str);
 
         lv_task_handler();
-        k_sleep(K_MSEC(10));
+        k_sleep(K_MSEC(100));
     }
 }

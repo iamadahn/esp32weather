@@ -4,6 +4,8 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/drivers/sensor.h>
 
+extern struct k_msgq wifi_state_msgq;
+
 LOG_MODULE_REGISTER(ths);
 
 K_MSGQ_DEFINE(temperature_inside_msgq, sizeof(struct sensor_value), 1, 1);
@@ -12,6 +14,15 @@ K_MSGQ_DEFINE(humidity_inside_msgq, sizeof(struct sensor_value), 1, 1);
 void ths_handler(void *, void *, void *)
 {
     const struct device *const aht30 = DEVICE_DT_GET_ONE(aosong_aht20);
+
+    unsigned char wifi_state = 0;
+    while (k_msgq_peek(&wifi_state_msgq, &wifi_state) != 0) {
+        k_sleep(K_MSEC(100));
+    }
+    
+    if (wifi_state != 1) {
+        LOG_ERR("Failed to get wifi state, aborting.");
+    }
 
     if (!device_is_ready(aht30)) {
         LOG_ERR("Failed to initialise aht30 sensor.");
