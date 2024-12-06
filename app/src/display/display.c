@@ -29,9 +29,6 @@ static void lv_btn_click_callback(lv_event_t *e)
 {
     ARG_UNUSED(e);
 
-    lv_obj_t *scr = lv_obj_create(NULL);
-    lv_scr_load(scr);
-
     if (lv_scr_act() == forecast_scr) {
         lv_scr_load(wife_scr);
     } else {
