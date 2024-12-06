@@ -4,7 +4,7 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/drivers/sensor.h>
 
-extern struct k_msgq wifi_state_msgq;
+extern struct k_msgq forecast_async_state_msgq;
 
 LOG_MODULE_REGISTER(ths);
 
@@ -15,13 +15,11 @@ void ths_handler(void *, void *, void *)
 {
     const struct device *const aht30 = DEVICE_DT_GET_ONE(aosong_aht20);
 
-    unsigned char wifi_state = 0;
-    while (k_msgq_peek(&wifi_state_msgq, &wifi_state) != 0) {
+    /* Let the async json request handle itself succesfully */
+    unsigned char forecast_async_state = 0;
+    while (forecast_async_state != 1) {
+        k_msgq_peek(&forecast_async_state_msgq, &forecast_async_state);
         k_sleep(K_MSEC(100));
-    }
-    
-    if (wifi_state != 1) {
-        LOG_ERR("Failed to get wifi state, aborting.");
     }
 
     if (!device_is_ready(aht30)) {

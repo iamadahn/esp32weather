@@ -18,7 +18,7 @@ LOG_MODULE_REGISTER(display);
 extern struct k_msgq temperature_inside_msgq,
                         humidity_inside_msgq,
                         temperature_outside_msgq,
-                        wifi_state_msgq,
+                        forecast_async_state_msgq,
                         humidity_outside_msgq;
 
 LV_IMG_DECLARE(wife);
@@ -221,14 +221,11 @@ void display_handler(void *, void *, void *)
     lv_task_handler();
     display_blanking_off(display_dev);
 
-    unsigned char wifi_state = 0;
-    while (k_msgq_peek(&wifi_state_msgq, &wifi_state) != 0) {
+    /* Let the async json request handle itself succesfully */
+    unsigned char forecast_async_state = 0;
+    while (forecast_async_state != 1) {
+        k_msgq_peek(&forecast_async_state_msgq, &forecast_async_state);
         k_sleep(K_MSEC(100));
-    }
-
-    if (wifi_state != 1) {
-        LOG_ERR("Faield to get wifi state, aborting.");
-        return;
     }
 
     while (1) {

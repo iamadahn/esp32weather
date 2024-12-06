@@ -17,11 +17,11 @@
 #define FORECAST_SERVER  "api.open-meteo.com"
 #define FORECAST_APICALL "your_apicall"
 
-LOG_MODULE_REGISTER(weather);
+LOG_MODULE_REGISTER(forecast);
 
 K_MSGQ_DEFINE(temperature_outside_msgq, sizeof(float), 1, 1);
 K_MSGQ_DEFINE(humidity_outside_msgq, sizeof(unsigned long), 1, 1);
-K_MSGQ_DEFINE(wifi_state_msgq, sizeof(unsigned short), 1, 1);
+K_MSGQ_DEFINE(forecast_async_state_msgq, sizeof(unsigned short), 1, 1);
 
 unsigned char recv_buf[3072];
 
@@ -118,7 +118,7 @@ static int socket_setup(const char* server, const char* port, int *sock)
 
     ret = zsock_getaddrinfo(server, port, &hints, &res);
     if (ret != 0) {
-        LOG_INF("getaddrinfo status: %d\n", ret);
+        LOG_ERR("getaddrinfo status: %d\n", ret);
         return -EINVAL;
     }
 
@@ -144,7 +144,13 @@ static int socket_setup(const char* server, const char* port, int *sock)
 }
 
 void forecast_handler(void *, void *, void *) {
-    int ret = wifi_connect(WIFI_USER_SSID, WIFI_USER_PSK);
+    unsigned char forecast_async_state = 0;
+    int ret = k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT);
+    if (ret != 0) {
+        LOG_ERR("Failed to push to wifi state queue");
+    }
+    
+    ret = wifi_connect(WIFI_USER_SSID, WIFI_USER_PSK);
 
     if (ret != 0) {
         LOG_ERR("Failed to connect to provided wifi station.");
@@ -155,8 +161,9 @@ void forecast_handler(void *, void *, void *) {
    
     forecast_get(FORECAST_SERVER, FORECAST_APICALL);
  
-    unsigned char wifi_state = 1;
-    ret = k_msgq_put(&wifi_state_msgq, &wifi_state, K_NO_WAIT);
+    forecast_async_state = 1;
+    k_msgq_purge(&forecast_async_state_msgq);
+    ret = k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT);
     if (ret != 0) {
         LOG_ERR("Failed to push to wifi state queue");
     }
