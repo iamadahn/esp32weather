@@ -60,3 +60,6 @@ scripts/platform-tests-results/
 
 # SonarCloud
 .scannerwork/
+
+# Zephyr environment
+.zephyr
