@@ -38,6 +38,10 @@ void display_handler(void *, void *, void *)
     forecast_scr = lv_obj_create(NULL);
     lv_scr_load(forecast_scr);
 
+    const struct gpio_dt_spec display_backlight = GPIO_DT_SPEC_GET(DT_ALIAS(backlight), gpios);
+    gpio_pin_configure_dt(&display_backlight, GPIO_OUTPUT_ACTIVE);
+    gpio_pin_set_dt(&display_backlight, true);
+
     /*---------------------*/
     /* Outside frame label */
     /*---------------------*/
@@ -46,6 +50,10 @@ void display_handler(void *, void *, void *)
     outside_frame_label = lv_label_create(lv_scr_act());
     lv_label_set_text(outside_frame_label, "Outside");
     lv_obj_align(outside_frame_label, LV_ALIGN_TOP_LEFT, 20, 5);
+ 
+    /*--------------------*/
+    /* Outside frame line */
+    /*--------------------*/
 
     lv_point_t outside_frame_line_points[] = { {18, 13}, {10, 13}, {10, 110}, {310, 110}, {310, 13}, {80, 13} };
     lv_style_t outside_frame_line_style;
@@ -58,6 +66,133 @@ void display_handler(void *, void *, void *)
     lv_line_set_points(outside_frame_line, outside_frame_line_points, 6);
     lv_obj_add_style(outside_frame_line, &outside_frame_line_style, 0);
     lv_obj_align(outside_frame_line, LV_ALIGN_TOP_LEFT, 0, 0);
+
+    /*--------------------------*/
+    /* Outside temperature line */
+    /*--------------------------*/
+    unsigned char outside_lines_space_length = 10,
+                outside_lines_macrospace_length = 1;
+
+    unsigned char outside_temp_line_x_length = 62,
+                outside_temp_line_y_length = 30;
+
+    unsigned short outside_temp_line_x_start = 20,
+                outside_temp_line_x_end = outside_temp_line_x_start + outside_temp_line_x_length,
+                outside_temp_line_x_center = outside_temp_line_x_end - (outside_temp_line_x_length / 2),
+
+                outside_temp_line_y_start = 55,
+                outside_temp_line_y_end =  outside_temp_line_y_start + outside_temp_line_y_length;
+
+    lv_point_t outside_temp_line_points[] = { 
+        {outside_temp_line_x_start, outside_temp_line_y_start},
+        {outside_temp_line_x_end, outside_temp_line_y_start},
+        {outside_temp_line_x_center, outside_temp_line_y_start},
+        {outside_temp_line_x_center, outside_temp_line_y_end}
+    };
+
+    lv_style_t outside_temp_line_style;
+    lv_style_init(&outside_temp_line_style);
+    lv_style_set_line_width(&outside_temp_line_style, 1);
+    lv_style_set_line_rounded(&outside_temp_line_style, true);
+
+    lv_obj_t *outside_temp_line;
+    outside_temp_line = lv_line_create(lv_scr_act());
+    lv_line_set_points(outside_temp_line, outside_temp_line_points, 4);
+    lv_obj_add_style(outside_temp_line, &outside_temp_line_style, 0);
+    lv_obj_align(outside_temp_line, LV_ALIGN_TOP_LEFT, 0, 0);
+
+    /*-----------------------*/
+    /* Outside humidity line */
+    /*-----------------------*/
+    unsigned char outside_hmdty_line_x_length = outside_temp_line_x_length,
+                outside_hmdty_line_y_length = outside_temp_line_y_length;
+
+    unsigned short outside_hmdty_line_x_start = outside_temp_line_x_end + outside_lines_space_length,
+                outside_hmdty_line_x_end = outside_hmdty_line_x_start + outside_hmdty_line_x_length,
+                outside_hmdty_line_x_center = outside_hmdty_line_x_end - (outside_hmdty_line_x_length / 2),
+
+                outside_hmdty_line_y_start = outside_temp_line_y_start,
+                outside_hmdty_line_y_end = outside_hmdty_line_y_start + outside_hmdty_line_y_length;
+
+    lv_point_t outside_hmdty_line_points[] = { 
+        {outside_hmdty_line_x_start, outside_hmdty_line_y_start},
+        {outside_hmdty_line_x_end, outside_hmdty_line_y_start},
+        {outside_hmdty_line_x_center, outside_hmdty_line_y_start},
+        {outside_hmdty_line_x_center, outside_hmdty_line_y_end}
+    };
+
+    lv_style_t outside_hmdty_line_style;
+    lv_style_init(&outside_hmdty_line_style);
+    lv_style_set_line_width(&outside_hmdty_line_style, 1);
+    lv_style_set_line_rounded(&outside_frame_line_style, true);
+
+    lv_obj_t *outside_hmdty_line;
+    outside_hmdty_line = lv_line_create(lv_scr_act());
+    lv_line_set_points(outside_hmdty_line, outside_hmdty_line_points, 4);
+    lv_obj_add_style(outside_hmdty_line, &outside_hmdty_line_style, 0);
+    lv_obj_align(outside_hmdty_line, LV_ALIGN_TOP_LEFT, 0, 0);
+
+    /*-------------------------*/
+    /* Outside wind speed line */
+    /*-------------------------*/
+    unsigned char outside_winds_line_x_length = outside_temp_line_x_length,
+                outside_winds_line_y_length = outside_temp_line_y_length;
+
+    unsigned short outside_winds_line_x_start = outside_hmdty_line_x_end + outside_lines_space_length + outside_lines_macrospace_length,
+                outside_winds_line_x_end = outside_winds_line_x_start + outside_winds_line_x_length,
+                outside_winds_line_x_center = outside_winds_line_x_end - (outside_winds_line_x_length / 2),
+
+                outside_winds_line_y_start = outside_temp_line_y_start,
+                outside_winds_line_y_end = outside_winds_line_y_start + outside_winds_line_y_length;
+
+    lv_point_t outside_winds_line_points[] = { 
+        {outside_winds_line_x_start, outside_winds_line_y_start},
+        {outside_winds_line_x_end, outside_winds_line_y_start},
+        {outside_winds_line_x_center, outside_winds_line_y_start},
+        {outside_winds_line_x_center, outside_winds_line_y_end}
+    };
+
+    lv_style_t outside_winds_line_style;
+    lv_style_init(&outside_winds_line_style);
+    lv_style_set_line_width(&outside_winds_line_style, 1);
+    lv_style_set_line_rounded(&outside_frame_line_style, true);
+
+    lv_obj_t *outside_winds_line;
+    outside_winds_line = lv_line_create(lv_scr_act());
+    lv_line_set_points(outside_winds_line, outside_winds_line_points, 4);
+    lv_obj_add_style(outside_winds_line, &outside_winds_line_style, 0);
+    lv_obj_align(outside_winds_line, LV_ALIGN_TOP_LEFT, 0, 0);
+    
+    /*--------------------------------*/
+    /* Outside ultraviolet index line */
+    /*--------------------------------*/
+    unsigned char outside_uvi_line_x_length = outside_temp_line_x_length,
+                outside_uvi_line_y_length = outside_temp_line_y_length;
+
+    unsigned short outside_uvi_line_x_start = outside_winds_line_x_end + outside_lines_space_length,
+                outside_uvi_line_x_end = outside_uvi_line_x_start + outside_uvi_line_x_length,
+                outside_uvi_line_x_center = outside_uvi_line_x_end - (outside_uvi_line_x_length / 2),
+
+                outside_uvi_line_y_start = outside_temp_line_y_start,
+                outside_uvi_line_y_end = outside_uvi_line_y_start + outside_uvi_line_y_length;
+
+    lv_point_t outside_uvi_line_points[] = { 
+        {outside_uvi_line_x_start, outside_uvi_line_y_start},
+        {outside_uvi_line_x_end, outside_uvi_line_y_start},
+        {outside_uvi_line_x_center, outside_uvi_line_y_start},
+        {outside_uvi_line_x_center, outside_uvi_line_y_end}
+    };
+
+    lv_style_t outside_uvi_line_style;
+    lv_style_init(&outside_uvi_line_style);
+    lv_style_set_line_width(&outside_uvi_line_style, 1);
+    lv_style_set_line_rounded(&outside_frame_line_style, true);
+
+    lv_obj_t *outside_uvi_line;
+    outside_uvi_line = lv_line_create(lv_scr_act());
+    lv_line_set_points(outside_uvi_line, outside_uvi_line_points, 4);
+    lv_obj_add_style(outside_uvi_line, &outside_uvi_line_style, 0);
+    lv_obj_align(outside_uvi_line, LV_ALIGN_TOP_LEFT, 0, 0);
 
     /*--------------------*/
     /* Inside frame label */
@@ -80,9 +215,9 @@ void display_handler(void *, void *, void *)
     lv_obj_add_style(inside_frame_line, &inside_frame_line_style, 0);
     lv_obj_align(inside_frame_line, LV_ALIGN_TOP_LEFT, 0, 0);
 
-    /*------------------*/
+    /*--------------------*/
     /* Time frame label */
-    /*------------------*/
+    /*--------------------*/
 
     lv_obj_t *time_frame_label;
     time_frame_label = lv_label_create(lv_scr_act());
@@ -100,10 +235,6 @@ void display_handler(void *, void *, void *)
     lv_line_set_points(time_frame_line, time_frame_line_points, 6);
     lv_obj_add_style(time_frame_line, &time_frame_line_style, 0);
     lv_obj_align(time_frame_line, LV_ALIGN_TOP_LEFT, 0, 0);
-    
-    const struct gpio_dt_spec display_backlight = GPIO_DT_SPEC_GET(DT_ALIAS(backlight), gpios);
-    gpio_pin_configure_dt(&display_backlight, GPIO_OUTPUT_ACTIVE);
-    gpio_pin_set_dt(&display_backlight, true);
 
     /*-------------------------------------*/
     /* The end of widgets creating section */
