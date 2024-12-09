@@ -105,12 +105,23 @@ void display_handler(void *, void *, void *)
     /* Outside temperature text label */
     /*--------------------------------*/
     unsigned short outside_temp_text_label_x = outside_temp_line_x_start,
-                outside_temp_text_label_y = 25;
+                outside_temp_text_label_y = 30;
 
     lv_obj_t *outside_temp_text_label = lv_label_create(lv_scr_act());
     lv_label_set_text(outside_temp_text_label, "Temp");
     lv_obj_set_style_text_font(outside_temp_text_label, &lv_font_montserrat_12, 0);
     lv_obj_align(outside_temp_text_label, LV_ALIGN_TOP_LEFT, outside_temp_text_label_x, outside_temp_text_label_y);
+
+    /*--------------------------------*/
+    /* Outside temperature data label */
+    /*--------------------------------*/
+    unsigned short outside_temp_data_label_x = outside_temp_text_label_x + 10,
+                outside_temp_data_label_y = outside_temp_text_label_y + 15;
+
+    lv_obj_t *outside_temp_data_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(outside_temp_data_label, "+30");
+    lv_obj_set_style_text_font(outside_temp_data_label, &lv_font_montserrat_18, 0);
+    lv_obj_align(outside_temp_data_label, LV_ALIGN_TOP_LEFT, outside_temp_data_label_x, outside_temp_data_label_y);
 
     /*-----------------------*/
     /* Outside humidity line */
@@ -147,12 +158,23 @@ void display_handler(void *, void *, void *)
     /* Outside humidity text label */
     /*-----------------------------*/
     unsigned short outside_hmdty_text_label_x = outside_hmdty_line_x_start,
-                outside_hmdty_text_label_y = 25;
+                outside_hmdty_text_label_y = outside_temp_text_label_y;
 
     lv_obj_t *outside_hmdty_text_label = lv_label_create(lv_scr_act());
     lv_label_set_text(outside_hmdty_text_label, "Hmdty");
     lv_obj_set_style_text_font(outside_hmdty_text_label, &lv_font_montserrat_12, 0);
     lv_obj_align(outside_hmdty_text_label, LV_ALIGN_TOP_LEFT, outside_hmdty_text_label_x, outside_hmdty_text_label_y);
+
+    /*-----------------------------*/
+    /* Outside humidity data label */
+    /*-----------------------------*/
+    unsigned short outside_hmdty_data_label_x = outside_hmdty_text_label_x + 19,
+                outside_hmdty_data_label_y = outside_temp_data_label_y;
+
+    lv_obj_t *outside_hmdty_data_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(outside_hmdty_data_label, "80");
+    lv_obj_set_style_text_font(outside_hmdty_data_label, &lv_font_montserrat_18, 0);
+    lv_obj_align(outside_hmdty_data_label, LV_ALIGN_TOP_LEFT, outside_hmdty_data_label_x, outside_hmdty_data_label_y);
 
     /*-------------------------*/
     /* Outside wind speed line */
@@ -189,12 +211,23 @@ void display_handler(void *, void *, void *)
     /* Outside wind speed text label */
     /*-------------------------------*/
     unsigned short outside_winds_text_label_x = outside_winds_line_x_start,
-                outside_winds_text_label_y = 25;
+                outside_winds_text_label_y = outside_hmdty_text_label_y;
 
     lv_obj_t *outside_winds_text_label = lv_label_create(lv_scr_act());
     lv_label_set_text(outside_winds_text_label, "Wind");
     lv_obj_set_style_text_font(outside_winds_text_label, &lv_font_montserrat_12, 0);
     lv_obj_align(outside_winds_text_label, LV_ALIGN_TOP_LEFT, outside_winds_text_label_x, outside_winds_text_label_y);
+
+    /*-------------------------------*/
+    /* Outside wind speed data label */
+    /*-------------------------------*/
+    unsigned short outside_winds_data_label_x = outside_winds_text_label_x + 23,
+                outside_winds_data_label_y = outside_temp_data_label_y;
+
+    lv_obj_t *outside_winds_data_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(outside_winds_data_label, "10");
+    lv_obj_set_style_text_font(outside_winds_data_label, &lv_font_montserrat_18, 0);
+    lv_obj_align(outside_winds_data_label, LV_ALIGN_TOP_LEFT, outside_winds_data_label_x, outside_winds_data_label_y);
 
     /*--------------------------------*/
     /* Outside ultraviolet index line */
@@ -227,16 +260,27 @@ void display_handler(void *, void *, void *)
     lv_obj_add_style(outside_uvi_line, &outside_uvi_line_style, 0);
     lv_obj_align(outside_uvi_line, LV_ALIGN_TOP_LEFT, 0, 0);
 
-    /*-------------------------------*/
-    /* Outside wind speed text label */
-    /*-------------------------------*/
+    /*--------------------------------------*/
+    /* Outside ultraviolet index text label */
+    /*--------------------------------------*/
     unsigned short outside_uvi_text_label_x = outside_uvi_line_x_start,
-                outside_uvi_text_label_y = 25;
+                outside_uvi_text_label_y = outside_winds_text_label_y;
 
     lv_obj_t *outside_uvi_text_label = lv_label_create(lv_scr_act());
     lv_label_set_text(outside_uvi_text_label, "UVI");
     lv_obj_set_style_text_font(outside_uvi_text_label, &lv_font_montserrat_12, 0);
     lv_obj_align(outside_uvi_text_label, LV_ALIGN_TOP_LEFT, outside_uvi_text_label_x, outside_uvi_text_label_y);
+
+    /*--------------------------------------*/
+    /* Outside ultraviolet index data label */
+    /*--------------------------------------*/
+    unsigned short outside_uvi_data_label_x = outside_uvi_text_label_x + 23,
+                outside_uvi_data_label_y = outside_temp_data_label_y;
+
+    lv_obj_t *outside_uvi_data_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(outside_uvi_data_label, "4");
+    lv_obj_set_style_text_font(outside_uvi_data_label, &lv_font_montserrat_18, 0);
+    lv_obj_align(outside_uvi_data_label, LV_ALIGN_TOP_LEFT, outside_uvi_data_label_x, outside_uvi_data_label_y);
 
     /*--------------------*/
     /* Inside frame label */
@@ -278,8 +322,8 @@ void display_handler(void *, void *, void *)
     time_frame_line = lv_line_create(lv_scr_act());
     lv_line_set_points(time_frame_line, time_frame_line_points, 6);
     lv_obj_add_style(time_frame_line, &time_frame_line_style, 0);
-    lv_obj_align(time_frame_line, LV_ALIGN_TOP_LEFT, 0, 0);
-    
+    lv_obj_align(time_frame_line, LV_ALIGN_TOP_LEFT, 0, 0);    
+
     /*-------------------------------------*/
     /* The end of widgets creating section */
     /*-------------------------------------*/
