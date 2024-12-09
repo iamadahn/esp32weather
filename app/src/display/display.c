@@ -80,7 +80,7 @@ void display_handler(void *, void *, void *)
                 outside_temp_line_x_end = outside_temp_line_x_start + outside_temp_line_x_length,
                 outside_temp_line_x_center = outside_temp_line_x_end - (outside_temp_line_x_length / 2),
 
-                outside_temp_line_y_start = 55,
+                outside_temp_line_y_start = 65,
                 outside_temp_line_y_end =  outside_temp_line_y_start + outside_temp_line_y_length;
 
     lv_point_t outside_temp_line_points[] = { 
@@ -100,6 +100,17 @@ void display_handler(void *, void *, void *)
     lv_line_set_points(outside_temp_line, outside_temp_line_points, 4);
     lv_obj_add_style(outside_temp_line, &outside_temp_line_style, 0);
     lv_obj_align(outside_temp_line, LV_ALIGN_TOP_LEFT, 0, 0);
+
+    /*--------------------------------*/
+    /* Outside temperature text label */
+    /*--------------------------------*/
+    unsigned short outside_temp_text_label_x = outside_temp_line_x_start,
+                outside_temp_text_label_y = 25;
+
+    lv_obj_t *outside_temp_text_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(outside_temp_text_label, "Temp");
+    lv_obj_set_style_text_font(outside_temp_text_label, &lv_font_montserrat_12, 0);
+    lv_obj_align(outside_temp_text_label, LV_ALIGN_TOP_LEFT, outside_temp_text_label_x, outside_temp_text_label_y);
 
     /*-----------------------*/
     /* Outside humidity line */
@@ -132,6 +143,17 @@ void display_handler(void *, void *, void *)
     lv_obj_add_style(outside_hmdty_line, &outside_hmdty_line_style, 0);
     lv_obj_align(outside_hmdty_line, LV_ALIGN_TOP_LEFT, 0, 0);
 
+    /*-----------------------------*/
+    /* Outside humidity text label */
+    /*-----------------------------*/
+    unsigned short outside_hmdty_text_label_x = outside_hmdty_line_x_start,
+                outside_hmdty_text_label_y = 25;
+
+    lv_obj_t *outside_hmdty_text_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(outside_hmdty_text_label, "Hmdty");
+    lv_obj_set_style_text_font(outside_hmdty_text_label, &lv_font_montserrat_12, 0);
+    lv_obj_align(outside_hmdty_text_label, LV_ALIGN_TOP_LEFT, outside_hmdty_text_label_x, outside_hmdty_text_label_y);
+
     /*-------------------------*/
     /* Outside wind speed line */
     /*-------------------------*/
@@ -163,6 +185,17 @@ void display_handler(void *, void *, void *)
     lv_obj_add_style(outside_winds_line, &outside_winds_line_style, 0);
     lv_obj_align(outside_winds_line, LV_ALIGN_TOP_LEFT, 0, 0);
     
+    /*-------------------------------*/
+    /* Outside wind speed text label */
+    /*-------------------------------*/
+    unsigned short outside_winds_text_label_x = outside_winds_line_x_start,
+                outside_winds_text_label_y = 25;
+
+    lv_obj_t *outside_winds_text_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(outside_winds_text_label, "Wind");
+    lv_obj_set_style_text_font(outside_winds_text_label, &lv_font_montserrat_12, 0);
+    lv_obj_align(outside_winds_text_label, LV_ALIGN_TOP_LEFT, outside_winds_text_label_x, outside_winds_text_label_y);
+
     /*--------------------------------*/
     /* Outside ultraviolet index line */
     /*--------------------------------*/
@@ -193,6 +226,17 @@ void display_handler(void *, void *, void *)
     lv_line_set_points(outside_uvi_line, outside_uvi_line_points, 4);
     lv_obj_add_style(outside_uvi_line, &outside_uvi_line_style, 0);
     lv_obj_align(outside_uvi_line, LV_ALIGN_TOP_LEFT, 0, 0);
+
+    /*-------------------------------*/
+    /* Outside wind speed text label */
+    /*-------------------------------*/
+    unsigned short outside_uvi_text_label_x = outside_uvi_line_x_start,
+                outside_uvi_text_label_y = 25;
+
+    lv_obj_t *outside_uvi_text_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(outside_uvi_text_label, "UVI");
+    lv_obj_set_style_text_font(outside_uvi_text_label, &lv_font_montserrat_12, 0);
+    lv_obj_align(outside_uvi_text_label, LV_ALIGN_TOP_LEFT, outside_uvi_text_label_x, outside_uvi_text_label_y);
 
     /*--------------------*/
     /* Inside frame label */
@@ -235,7 +279,7 @@ void display_handler(void *, void *, void *)
     lv_line_set_points(time_frame_line, time_frame_line_points, 6);
     lv_obj_add_style(time_frame_line, &time_frame_line_style, 0);
     lv_obj_align(time_frame_line, LV_ALIGN_TOP_LEFT, 0, 0);
-
+    
     /*-------------------------------------*/
     /* The end of widgets creating section */
     /*-------------------------------------*/
