@@ -13,7 +13,21 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/logging/log.h>
 
+#define SCR_WIDTH 320
+#define SCR_HEIGHT 240
+
+#define JETBRAINS_14_WIDTH 8
+#define JETBRAINS_12_WIDTH 7
+
 LOG_MODULE_REGISTER(display);
+
+LV_IMG_DECLARE(wife);
+
+LV_FONT_DECLARE(jetbrains_12);
+LV_FONT_DECLARE(jetbrains_14);
+LV_FONT_DECLARE(jetbrains_18);
+
+static unsigned char scr_pressed = 0;
 
 extern struct k_msgq temperature_inside_msgq,
                         humidity_inside_msgq,
@@ -21,9 +35,39 @@ extern struct k_msgq temperature_inside_msgq,
                         forecast_async_state_msgq,
                         humidity_outside_msgq;
 
-LV_IMG_DECLARE(wife);
 
 static lv_obj_t *forecast_scr, *wife_scr;
+
+static void scr_pressed_cb(lv_event_t *event)
+{
+    scr_pressed = 1;
+    printf("Clicked on screen!\n");
+}
+
+static lv_obj_t* label_create(char *text, const lv_font_t *font, lv_color_t color, unsigned short x, unsigned short y) {
+    lv_obj_t* label;
+    label = lv_label_create(lv_scr_act());
+    lv_label_set_text(label, text);
+    lv_obj_set_style_text_font(label, font, 0);
+    lv_obj_set_style_text_color(label, color, 0);
+    lv_obj_align(label, LV_ALIGN_TOP_LEFT, x, y);
+
+    return label;
+}
+
+static lv_obj_t* line_create(lv_point_t *points, lv_style_t *style, unsigned char width, unsigned char points_num) {
+    lv_style_init(style);
+    lv_style_set_line_width(style, width);
+    lv_style_set_line_rounded(style, true);
+
+    lv_obj_t* line;
+    line = lv_line_create(lv_scr_act());
+    lv_line_set_points(line, points, points_num);
+    lv_obj_add_style(line, style, 0);
+    lv_obj_align(line, LV_ALIGN_TOP_LEFT, 0, 0);
+
+    return line;
+}
 
 void display_handler(void *, void *, void *)
 {
@@ -42,41 +86,75 @@ void display_handler(void *, void *, void *)
     gpio_pin_configure_dt(&display_backlight, GPIO_OUTPUT_ACTIVE);
     gpio_pin_set_dt(&display_backlight, true);
 
+    lv_color_t background_color = lv_color_make(0xEA, 0x93, 0x2E);
+    lv_color_t font_color = lv_color_make(0x00, 0x00, 0x00);
+
+    wife_scr = lv_obj_create(NULL);
+    lv_scr_load(wife_scr);
+    lv_obj_add_event_cb(wife_scr, scr_pressed_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_style_bg_color(lv_scr_act(), background_color, 0);
+
+    lv_obj_t *wife_img = lv_img_create(lv_scr_act());
+    lv_img_set_src(wife_img, &wife);
+    lv_obj_align(wife_img, LV_ALIGN_TOP_LEFT, 0, 0);
+
+    forecast_scr = lv_obj_create(NULL);
+    lv_scr_load(forecast_scr);
+    lv_obj_add_event_cb(forecast_scr, scr_pressed_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_style_bg_color(lv_scr_act(), background_color, 0);
+
+    /*--------------------*/
+    /* Frame-realted vars */
+    /*--------------------*/
+    unsigned char frame_label_opacity = 2,
+        frame_scr_border_opacity = 10;
+
     /*---------------------*/
     /* Outside frame label */
     /*---------------------*/
+    char *outside_frame_label_text = "Outside";
+    unsigned char outside_frame_label_pixel_size = strlen(outside_frame_label_text) * JETBRAINS_14_WIDTH;
+    unsigned short outside_frame_label_x_start = frame_scr_border_opacity * 2,
+        outside_frame_label_y_start = frame_scr_border_opacity / 2;
 
-    lv_obj_t *outside_frame_label;
-    outside_frame_label = lv_label_create(lv_scr_act());
-    lv_label_set_text(outside_frame_label, "Outside");
-    lv_obj_align(outside_frame_label, LV_ALIGN_TOP_LEFT, 20, 5);
- 
+    lv_obj_t *outside_frame_label = label_create(
+        outside_frame_label_text,
+        &jetbrains_14,
+        font_color,
+        outside_frame_label_x_start,
+        outside_frame_label_y_start
+    );
+
     /*--------------------*/
     /* Outside frame line */
     /*--------------------*/
+    unsigned short outside_frame_line_x_start = outside_frame_label_x_start - frame_label_opacity,
+        outside_frame_line_x_end = outside_frame_label_x_start + outside_frame_label_pixel_size + frame_label_opacity,
+        outside_frame_line_y_start = frame_scr_border_opacity,
+        outside_frame_line_y_end = (SCR_HEIGHT - frame_scr_border_opacity) / 2;
 
-    lv_point_t outside_frame_line_points[] = { {18, 13}, {10, 13}, {10, 110}, {310, 110}, {310, 13}, {80, 13} };
+    lv_point_t outside_frame_line_points[] = { 
+        {outside_frame_line_x_start, outside_frame_line_y_start},
+        {frame_scr_border_opacity, frame_scr_border_opacity},
+        {frame_scr_border_opacity, outside_frame_line_y_end},
+        {SCR_WIDTH - frame_scr_border_opacity, outside_frame_line_y_end},
+        {SCR_WIDTH - frame_scr_border_opacity, frame_scr_border_opacity},
+        {outside_frame_line_x_end, frame_scr_border_opacity}
+    };
+
     lv_style_t outside_frame_line_style;
-    lv_style_init(&outside_frame_line_style);
-    lv_style_set_line_width(&outside_frame_line_style, 2);
-    lv_style_set_line_rounded(&outside_frame_line_style, true);
+    lv_obj_t *outside_frame_line = line_create(outside_frame_line_points, &outside_frame_line_style, 2, 6);
 
-    lv_obj_t *outside_frame_line;
-    outside_frame_line = lv_line_create(lv_scr_act());
-    lv_line_set_points(outside_frame_line, outside_frame_line_points, 6);
-    lv_obj_add_style(outside_frame_line, &outside_frame_line_style, 0);
-    lv_obj_align(outside_frame_line, LV_ALIGN_TOP_LEFT, 0, 0);
-
-    /*--------------------------*/
-    /* Outside temperature line */
-    /*--------------------------*/
-    unsigned char outside_lines_space_length = 10,
+    /*---------------------------------*/
+    /* Outside temperature inside line */
+    /*---------------------------------*/
+    unsigned char outside_lines_space_length = frame_scr_border_opacity,
                 outside_lines_macrospace_length = 1;
 
     unsigned char outside_temp_line_x_length = 62,
-                outside_temp_line_y_length = 30;
+                outside_temp_line_y_length = 25;
 
-    unsigned short outside_temp_line_x_start = 20,
+    unsigned short outside_temp_line_x_start = frame_scr_border_opacity * 2,
                 outside_temp_line_x_end = outside_temp_line_x_start + outside_temp_line_x_length,
                 outside_temp_line_x_center = outside_temp_line_x_end - (outside_temp_line_x_length / 2),
 
@@ -91,36 +169,65 @@ void display_handler(void *, void *, void *)
     };
 
     lv_style_t outside_temp_line_style;
-    lv_style_init(&outside_temp_line_style);
-    lv_style_set_line_width(&outside_temp_line_style, 1);
-    lv_style_set_line_rounded(&outside_temp_line_style, true);
-
-    lv_obj_t *outside_temp_line;
-    outside_temp_line = lv_line_create(lv_scr_act());
-    lv_line_set_points(outside_temp_line, outside_temp_line_points, 4);
-    lv_obj_add_style(outside_temp_line, &outside_temp_line_style, 0);
-    lv_obj_align(outside_temp_line, LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_obj_t *outside_temp_line = line_create(outside_temp_line_points, &outside_temp_line_style, 1, 4);
 
     /*--------------------------------*/
     /* Outside temperature text label */
     /*--------------------------------*/
-    unsigned short outside_temp_text_label_x = outside_temp_line_x_start,
-                outside_temp_text_label_y = 30;
+    char* outside_temp_text_label_text = "Temp";
+    unsigned char outside_temp_label_pixel_size = strlen(outside_temp_text_label_text) * JETBRAINS_12_WIDTH;
+    unsigned char outside_text_label_space_length = 5;
 
-    lv_obj_t *outside_temp_text_label = lv_label_create(lv_scr_act());
-    lv_label_set_text(outside_temp_text_label, "Temp");
-    lv_obj_set_style_text_font(outside_temp_text_label, &lv_font_montserrat_12, 0);
-    lv_obj_align(outside_temp_text_label, LV_ALIGN_TOP_LEFT, outside_temp_text_label_x, outside_temp_text_label_y);
+    unsigned short outside_temp_text_label_x = outside_temp_line_x_start + outside_text_label_space_length + frame_label_opacity,
+                outside_temp_text_label_y = 27;
+
+    lv_obj_t *outside_temp_text_label = label_create(
+        outside_temp_text_label_text,
+        &jetbrains_12,
+        font_color,
+        outside_temp_text_label_x,
+        outside_temp_text_label_y
+    );
+
+    /*-----------------------------------*/
+    /* Outside temperature left out line */
+    /*-----------------------------------*/
+    unsigned short outside_temp_left_out_line_x_start = outside_temp_text_label_x - frame_label_opacity,
+                outside_temp_left_out_line_y_start = outside_temp_text_label_y + 4;
+
+    lv_point_t outside_temp_left_out_line_points[] = { 
+        {outside_temp_left_out_line_x_start, outside_temp_left_out_line_y_start},
+        {outside_temp_line_x_start, outside_temp_left_out_line_y_start},
+        {outside_temp_line_x_start, outside_temp_left_out_line_y_start + 5},
+    };
+
+    lv_style_t outside_temp_left_out_line_style;
+    lv_obj_t *outside_temp_left_out_line = line_create(outside_temp_left_out_line_points, &outside_temp_left_out_line_style, 1, 3);
+
+    /*------------------------------------*/
+    /* Outside temperature right out line */
+    /*------------------------------------*/
+    unsigned short outside_temp_right_out_line_x_start = outside_temp_text_label_x + outside_temp_label_pixel_size + frame_label_opacity,
+                outside_temp_right_out_line_y_start = outside_temp_text_label_y + 4;
+
+    lv_point_t outside_temp_right_out_line_points[] = { 
+        {outside_temp_right_out_line_x_start, outside_temp_right_out_line_y_start},
+        {outside_temp_line_x_end, outside_temp_right_out_line_y_start},
+        {outside_temp_line_x_end, outside_temp_right_out_line_y_start + 5},
+    };
+
+    lv_style_t outside_temp_right_out_line_style;
+    lv_obj_t *outside_temp_right_out_line = line_create(outside_temp_right_out_line_points, &outside_temp_right_out_line_style, 1, 3);
 
     /*--------------------------------*/
     /* Outside temperature data label */
     /*--------------------------------*/
-    unsigned short outside_temp_data_label_x = outside_temp_text_label_x + 10,
-                outside_temp_data_label_y = outside_temp_text_label_y + 15;
+    unsigned short outside_temp_data_label_x = outside_temp_line_x_start + 10,
+                outside_temp_data_label_y = outside_temp_text_label_y + 20;
 
     lv_obj_t *outside_temp_data_label = lv_label_create(lv_scr_act());
     lv_label_set_text(outside_temp_data_label, "+30");
-    lv_obj_set_style_text_font(outside_temp_data_label, &lv_font_montserrat_18, 0);
+    lv_obj_set_style_text_font(outside_temp_data_label, &jetbrains_18, 0);
     lv_obj_align(outside_temp_data_label, LV_ALIGN_TOP_LEFT, outside_temp_data_label_x, outside_temp_data_label_y);
 
     /*-----------------------*/
@@ -146,7 +253,7 @@ void display_handler(void *, void *, void *)
     lv_style_t outside_hmdty_line_style;
     lv_style_init(&outside_hmdty_line_style);
     lv_style_set_line_width(&outside_hmdty_line_style, 1);
-    lv_style_set_line_rounded(&outside_frame_line_style, true);
+    lv_style_set_line_rounded(&outside_hmdty_line_style, true);
 
     lv_obj_t *outside_hmdty_line;
     outside_hmdty_line = lv_line_create(lv_scr_act());
@@ -157,18 +264,18 @@ void display_handler(void *, void *, void *)
     /*-----------------------------*/
     /* Outside humidity text label */
     /*-----------------------------*/
-    unsigned short outside_hmdty_text_label_x = outside_hmdty_line_x_start,
+    unsigned short outside_hmdty_text_label_x = outside_hmdty_line_x_start + outside_text_label_space_length,
                 outside_hmdty_text_label_y = outside_temp_text_label_y;
 
     lv_obj_t *outside_hmdty_text_label = lv_label_create(lv_scr_act());
-    lv_label_set_text(outside_hmdty_text_label, "Hmdty");
+    lv_label_set_text(outside_hmdty_text_label, "Hmd");
     lv_obj_set_style_text_font(outside_hmdty_text_label, &lv_font_montserrat_12, 0);
     lv_obj_align(outside_hmdty_text_label, LV_ALIGN_TOP_LEFT, outside_hmdty_text_label_x, outside_hmdty_text_label_y);
 
     /*-----------------------------*/
     /* Outside humidity data label */
     /*-----------------------------*/
-    unsigned short outside_hmdty_data_label_x = outside_hmdty_text_label_x + 19,
+    unsigned short outside_hmdty_data_label_x = outside_hmdty_line_x_start + 19,
                 outside_hmdty_data_label_y = outside_temp_data_label_y;
 
     lv_obj_t *outside_hmdty_data_label = lv_label_create(lv_scr_act());
@@ -199,7 +306,7 @@ void display_handler(void *, void *, void *)
     lv_style_t outside_winds_line_style;
     lv_style_init(&outside_winds_line_style);
     lv_style_set_line_width(&outside_winds_line_style, 1);
-    lv_style_set_line_rounded(&outside_frame_line_style, true);
+    lv_style_set_line_rounded(&outside_winds_line_style, true);
 
     lv_obj_t *outside_winds_line;
     outside_winds_line = lv_line_create(lv_scr_act());
@@ -210,7 +317,7 @@ void display_handler(void *, void *, void *)
     /*-------------------------------*/
     /* Outside wind speed text label */
     /*-------------------------------*/
-    unsigned short outside_winds_text_label_x = outside_winds_line_x_start,
+    unsigned short outside_winds_text_label_x = outside_winds_line_x_start + outside_text_label_space_length,
                 outside_winds_text_label_y = outside_hmdty_text_label_y;
 
     lv_obj_t *outside_winds_text_label = lv_label_create(lv_scr_act());
@@ -221,7 +328,7 @@ void display_handler(void *, void *, void *)
     /*-------------------------------*/
     /* Outside wind speed data label */
     /*-------------------------------*/
-    unsigned short outside_winds_data_label_x = outside_winds_text_label_x + 23,
+    unsigned short outside_winds_data_label_x = outside_winds_line_x_start + 23,
                 outside_winds_data_label_y = outside_temp_data_label_y;
 
     lv_obj_t *outside_winds_data_label = lv_label_create(lv_scr_act());
@@ -252,7 +359,7 @@ void display_handler(void *, void *, void *)
     lv_style_t outside_uvi_line_style;
     lv_style_init(&outside_uvi_line_style);
     lv_style_set_line_width(&outside_uvi_line_style, 1);
-    lv_style_set_line_rounded(&outside_frame_line_style, true);
+    lv_style_set_line_rounded(&outside_uvi_line_style, true);
 
     lv_obj_t *outside_uvi_line;
     outside_uvi_line = lv_line_create(lv_scr_act());
@@ -263,7 +370,7 @@ void display_handler(void *, void *, void *)
     /*--------------------------------------*/
     /* Outside ultraviolet index text label */
     /*--------------------------------------*/
-    unsigned short outside_uvi_text_label_x = outside_uvi_line_x_start,
+    unsigned short outside_uvi_text_label_x = outside_uvi_line_x_start + outside_text_label_space_length,
                 outside_uvi_text_label_y = outside_winds_text_label_y;
 
     lv_obj_t *outside_uvi_text_label = lv_label_create(lv_scr_act());
@@ -274,7 +381,7 @@ void display_handler(void *, void *, void *)
     /*--------------------------------------*/
     /* Outside ultraviolet index data label */
     /*--------------------------------------*/
-    unsigned short outside_uvi_data_label_x = outside_uvi_text_label_x + 23,
+    unsigned short outside_uvi_data_label_x = outside_uvi_line_x_start + 23,
                 outside_uvi_data_label_y = outside_temp_data_label_y;
 
     lv_obj_t *outside_uvi_data_label = lv_label_create(lv_scr_act());
@@ -322,7 +429,7 @@ void display_handler(void *, void *, void *)
     time_frame_line = lv_line_create(lv_scr_act());
     lv_line_set_points(time_frame_line, time_frame_line_points, 6);
     lv_obj_add_style(time_frame_line, &time_frame_line_style, 0);
-    lv_obj_align(time_frame_line, LV_ALIGN_TOP_LEFT, 0, 0);    
+    lv_obj_align(time_frame_line, LV_ALIGN_TOP_LEFT, 0, 0);  
 
     /*-------------------------------------*/
     /* The end of widgets creating section */
