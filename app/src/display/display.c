@@ -45,6 +45,7 @@ struct data_widget {
     lv_point_t right_line_points[3];
     lv_style_t style;
     lv_color_t color;
+    unsigned int length;
 };
 
 static unsigned char scr_pressed = 0;
@@ -296,299 +297,72 @@ void display_handler(void *, void *, void *)
     );
 
     /*---------------------------------*/
-    /* Outside temperature inside line */
+    /* Outside temperature data widget */
     /*---------------------------------*/
-    unsigned char outside_lines_space_length = frame_scr_border_opacity,
-        outside_lines_macrospace_length = 1;
+    unsigned int outside_temp_data_widget_x = SCR_BORDER_OPACITY * 2,
+            outside_temp_data_widget_y = SCR_BORDER_OPACITY * 3;
 
-    unsigned char outside_temp_line_x_length = 62,
-        outside_temp_line_y_length = 25;
-
-    unsigned short outside_temp_line_x_start = frame_scr_border_opacity * 2,
-        outside_temp_line_x_end = outside_temp_line_x_start + outside_temp_line_x_length,
-        outside_temp_line_x_center = outside_temp_line_x_end - (outside_temp_line_x_length / 2),
-
-        outside_temp_line_y_start = 65,
-        outside_temp_line_y_end =  outside_temp_line_y_start + outside_temp_line_y_length;
-
-    lv_point_t outside_temp_line_points[] = { 
-        {outside_temp_line_x_start, outside_temp_line_y_start},
-        {outside_temp_line_x_end, outside_temp_line_y_start},
-        {outside_temp_line_x_center, outside_temp_line_y_start},
-        {outside_temp_line_x_center, outside_temp_line_y_end}
+    struct data_widget outside_temp_data_widget = {
+        .text = "Temp",
+        .color = font_color,
     };
 
-    //lv_obj_t *outside_temp_line = line_create(outside_temp_line_points, &outside_temp_line_style, 1, 4);
-
-    /*--------------------------------*/
-    /* Outside temperature text label */
-    /*--------------------------------*/
-    char* outside_temp_text_label_text = "Temp";
-    unsigned char outside_temp_label_pixel_size = strlen(outside_temp_text_label_text) * JETBRAINS_12_WIDTH;
-    unsigned char outside_text_label_space_length = 5;
-
-    unsigned short outside_temp_text_label_x = outside_temp_line_x_start + outside_text_label_space_length + frame_label_opacity,
-        outside_temp_text_label_y = 27;
-
-    lv_obj_t *outside_temp_text_label = label_create(
-        outside_temp_text_label_text,
-        &jetbrains_12,
-        font_color,
-        outside_temp_text_label_x,
-        outside_temp_text_label_y
+    data_widget_create(
+        &outside_temp_data_widget,
+        outside_temp_data_widget_x,
+        outside_temp_data_widget_y
     );
 
-    /*-----------------------------------*/
-    /* Outside temperature left out line */
-    /*-----------------------------------*/
-    unsigned short outside_temp_left_out_line_x_start = outside_temp_text_label_x - frame_label_opacity,
-        outside_temp_left_out_line_y_start = outside_temp_text_label_y + 4;
+    /*------------------------------*/
+    /* Outside humidity data widget */
+    /*------------------------------*/
+    unsigned int outside_hmdty_data_widget_x = outside_temp_data_widget_x + outside_temp_data_widget.length + SCR_BORDER_OPACITY,
+            outside_hmdty_data_widget_y = outside_temp_data_widget_y;
 
-    lv_point_t outside_temp_left_out_line_points[] = { 
-        {outside_temp_left_out_line_x_start, outside_temp_left_out_line_y_start},
-        {outside_temp_line_x_start, outside_temp_left_out_line_y_start},
-        {outside_temp_line_x_start, outside_temp_left_out_line_y_start + 5},
+    struct data_widget outside_hmdty_data_widget = {
+        .text = "Hmd",
+        .color = font_color,
     };
 
-    /*lv_obj_t *outside_temp_left_out_line = line_create(
-        outside_temp_left_out_line_points,
-        &outside_temp_left_out_line_style,
-        1,
-        3
-    );*/
+    data_widget_create(
+        &outside_hmdty_data_widget,
+        outside_hmdty_data_widget_x,
+        outside_hmdty_data_widget_y
+    ); 
 
-    /*------------------------------------*/
-    /* Outside temperature right out line */
-    /*------------------------------------*/
-    unsigned short outside_temp_right_out_line_x_start = outside_temp_text_label_x + outside_temp_label_pixel_size + frame_label_opacity,
-        outside_temp_right_out_line_y_start = outside_temp_text_label_y + 4;
+    /*--------------------------------*/
+    /* Outside wind speed data widget */
+    /*--------------------------------*/
+    unsigned int outside_winds_data_widget_x = outside_hmdty_data_widget_x + outside_hmdty_data_widget.length + SCR_BORDER_OPACITY + 1,
+            outside_winds_data_widget_y = outside_hmdty_data_widget_y;
 
-    lv_point_t outside_temp_right_out_line_points[] = { 
-        {outside_temp_right_out_line_x_start, outside_temp_right_out_line_y_start},
-        {outside_temp_line_x_end, outside_temp_right_out_line_y_start},
-        {outside_temp_line_x_end, outside_temp_right_out_line_y_start + 5},
+    struct data_widget outside_winds_data_widget = {
+        .text = "Wind",
+        .color = font_color,
     };
 
-    /*lv_obj_t *outside_temp_right_out_line = line_create(
-        outside_temp_right_out_line_points,
-        &outside_temp_right_out_line_style,
-        1,
-        3
-    );*/
+    data_widget_create(
+        &outside_winds_data_widget,
+        outside_winds_data_widget_x,
+        outside_winds_data_widget_y
+    ); 
 
-    /*--------------------------------*/
-    /* Outside temperature data label */
-    /*--------------------------------*/
-    char* outside_temp_data_label_text = "+30";
-    unsigned short outside_temp_data_label_x = outside_temp_line_x_start + 10,
-                outside_temp_data_label_y = outside_temp_text_label_y + (frame_scr_border_opacity * 2);
+    /*---------------------------------------*/
+    /* Outside ultraviolet index data widget */
+    /*---------------------------------------*/
+    unsigned int outside_uvi_data_widget_x = outside_winds_data_widget_x + outside_winds_data_widget.length + SCR_BORDER_OPACITY,
+            outside_uvi_data_widget_y = outside_winds_data_widget_y;
 
-    lv_obj_t *outside_temp_data_label = label_create(
-        outside_temp_data_label_text,
-        &jetbrains_18,
-        font_color,
-        outside_temp_data_label_x,
-        outside_temp_data_label_y
+    struct data_widget outside_uvi_data_widget = {
+        .text = "Uvi",
+        .color = font_color,
+    };
+
+    data_widget_create(
+        &outside_uvi_data_widget,
+        outside_uvi_data_widget_x,
+        outside_uvi_data_widget_y
     );
-
-    /*-----------------------*/
-    /* Outside humidity line */
-    /*-----------------------*/
-    unsigned char outside_hmdty_line_x_length = outside_temp_line_x_length,
-                outside_hmdty_line_y_length = outside_temp_line_y_length;
-
-    unsigned short outside_hmdty_line_x_start = outside_temp_line_x_end + outside_lines_space_length,
-                outside_hmdty_line_x_end = outside_hmdty_line_x_start + outside_hmdty_line_x_length,
-                outside_hmdty_line_x_center = outside_hmdty_line_x_end - (outside_hmdty_line_x_length / 2),
-
-                outside_hmdty_line_y_start = outside_temp_line_y_start,
-                outside_hmdty_line_y_end = outside_hmdty_line_y_start + outside_hmdty_line_y_length;
-
-    lv_point_t outside_hmdty_line_points[] = { 
-        {outside_hmdty_line_x_start, outside_hmdty_line_y_start},
-        {outside_hmdty_line_x_end, outside_hmdty_line_y_start},
-        {outside_hmdty_line_x_center, outside_hmdty_line_y_start},
-        {outside_hmdty_line_x_center, outside_hmdty_line_y_end}
-    };
-
-    /*lv_style_t outside_hmdty_line_style;
-    lv_obj_t *outside_hmdty_line = line_create(
-        outside_hmdty_line_points,
-        &outside_hmdty_line_style,
-        1,
-        4
-    );*/
-
-    /*-----------------------------*/
-    /* Outside humidity text label */
-    /*-----------------------------*/
-    char* outside_hmdty_text_label_text = "Hmd";
-    unsigned char outside_hmdty_label_pixel_size = strlen(outside_hmdty_text_label_text) * JETBRAINS_12_WIDTH;
-
-    unsigned short outside_hmdty_text_label_x = outside_hmdty_line_x_start + outside_text_label_space_length + frame_label_opacity,
-        outside_hmdty_text_label_y = outside_temp_text_label_y;
-
-    lv_obj_t *outside_hmdty_text_label = label_create(
-        outside_hmdty_text_label_text,
-        &jetbrains_12,
-        font_color,
-        outside_hmdty_text_label_x,
-        outside_hmdty_text_label_y
-    );
-
-    /*--------------------------------*/
-    /* Outside humidity left out line */
-    /*--------------------------------*/
-    unsigned short outside_hmdty_left_out_line_x_start = outside_hmdty_text_label_x - frame_label_opacity,
-        outside_hmdty_left_out_line_y_start = outside_hmdty_text_label_y + 4;
-
-    lv_point_t outside_hmdty_left_out_line_points[] = { 
-        {outside_hmdty_left_out_line_x_start, outside_hmdty_left_out_line_y_start},
-        {outside_hmdty_line_x_start, outside_hmdty_left_out_line_y_start},
-        {outside_hmdty_line_x_start, outside_hmdty_left_out_line_y_start + 5},
-    };
-
-    /*lv_obj_t *outside_hmdty_left_out_line = line_create(
-        outside_hmdty_left_out_line_points,
-        &outside_hmdty_left_out_line_style,
-        1,
-        3
-    );*/
-
-    /*---------------------------------*/
-    /* Outside humidity right out line */
-    /*---------------------------------*/
-    unsigned short outside_hmdty_right_out_line_x_start = outside_hmdty_text_label_x + outside_hmdty_label_pixel_size + frame_label_opacity,
-        outside_hmdty_right_out_line_y_start = outside_hmdty_text_label_y + 4;
-
-    lv_point_t outside_hmdty_right_out_line_points[] = { 
-        {outside_hmdty_right_out_line_x_start, outside_hmdty_right_out_line_y_start},
-        {outside_hmdty_line_x_end, outside_hmdty_right_out_line_y_start},
-        {outside_hmdty_line_x_end, outside_hmdty_right_out_line_y_start + 5},
-    };
-
-    //lv_obj_t *outside_hmdty_right_out_line = line_create(outside_hmdty_right_out_line_points, &outside_hmdty_right_out_line_style, 1, 3);
-
-    /*-----------------------------*/
-    /* Outside humidity data label */
-    /*-----------------------------*/
-    char* outside_hmdty_data_label_text = "80";
-    unsigned short outside_hmdty_data_label_x = outside_hmdty_line_x_start + 20,
-        outside_hmdty_data_label_y = outside_temp_data_label_y;
-
-    lv_obj_t *outside_hmdty_data_label = label_create(
-        outside_hmdty_data_label_text,
-        &jetbrains_18,
-        font_color,
-        outside_hmdty_data_label_x,
-        outside_hmdty_data_label_y
-    );
-
-    /*-------------------------*/
-    /* Outside wind speed line */
-    /*-------------------------*/
-    unsigned char outside_winds_line_x_length = outside_temp_line_x_length,
-                outside_winds_line_y_length = outside_temp_line_y_length;
-
-    unsigned short outside_winds_line_x_start = outside_hmdty_line_x_end + outside_lines_space_length + outside_lines_macrospace_length,
-                outside_winds_line_x_end = outside_winds_line_x_start + outside_winds_line_x_length,
-                outside_winds_line_x_center = outside_winds_line_x_end - (outside_winds_line_x_length / 2),
-
-                outside_winds_line_y_start = outside_temp_line_y_start,
-                outside_winds_line_y_end = outside_winds_line_y_start + outside_winds_line_y_length;
-
-    lv_point_t outside_winds_line_points[] = { 
-        {outside_winds_line_x_start, outside_winds_line_y_start},
-        {outside_winds_line_x_end, outside_winds_line_y_start},
-        {outside_winds_line_x_center, outside_winds_line_y_start},
-        {outside_winds_line_x_center, outside_winds_line_y_end}
-    };
-
-    lv_style_t outside_winds_line_style;
-    lv_style_init(&outside_winds_line_style);
-    lv_style_set_line_width(&outside_winds_line_style, 1);
-    lv_style_set_line_rounded(&outside_winds_line_style, true);
-
-    lv_obj_t *outside_winds_line;
-    outside_winds_line = lv_line_create(lv_scr_act());
-    lv_line_set_points(outside_winds_line, outside_winds_line_points, 4);
-    lv_obj_add_style(outside_winds_line, &outside_winds_line_style, 0);
-    lv_obj_align(outside_winds_line, LV_ALIGN_TOP_LEFT, 0, 0);
-    
-    /*-------------------------------*/
-    /* Outside wind speed text label */
-    /*-------------------------------*/
-    unsigned short outside_winds_text_label_x = outside_winds_line_x_start + outside_text_label_space_length,
-                outside_winds_text_label_y = outside_hmdty_text_label_y;
-
-    lv_obj_t *outside_winds_text_label = lv_label_create(lv_scr_act());
-    lv_label_set_text(outside_winds_text_label, "Wind");
-    lv_obj_set_style_text_font(outside_winds_text_label, &lv_font_montserrat_12, 0);
-    lv_obj_align(outside_winds_text_label, LV_ALIGN_TOP_LEFT, outside_winds_text_label_x, outside_winds_text_label_y);
-
-    /*-------------------------------*/
-    /* Outside wind speed data label */
-    /*-------------------------------*/
-    unsigned short outside_winds_data_label_x = outside_winds_line_x_start + 23,
-                outside_winds_data_label_y = outside_temp_data_label_y;
-
-    lv_obj_t *outside_winds_data_label = lv_label_create(lv_scr_act());
-    lv_label_set_text(outside_winds_data_label, "10");
-    lv_obj_set_style_text_font(outside_winds_data_label, &lv_font_montserrat_18, 0);
-    lv_obj_align(outside_winds_data_label, LV_ALIGN_TOP_LEFT, outside_winds_data_label_x, outside_winds_data_label_y);
-
-    /*--------------------------------*/
-    /* Outside ultraviolet index line */
-    /*--------------------------------*/
-    unsigned char outside_uvi_line_x_length = outside_temp_line_x_length,
-                outside_uvi_line_y_length = outside_temp_line_y_length;
-
-    unsigned short outside_uvi_line_x_start = outside_winds_line_x_end + outside_lines_space_length,
-                outside_uvi_line_x_end = outside_uvi_line_x_start + outside_uvi_line_x_length,
-                outside_uvi_line_x_center = outside_uvi_line_x_end - (outside_uvi_line_x_length / 2),
-
-                outside_uvi_line_y_start = outside_temp_line_y_start,
-                outside_uvi_line_y_end = outside_uvi_line_y_start + outside_uvi_line_y_length;
-
-    lv_point_t outside_uvi_line_points[] = { 
-        {outside_uvi_line_x_start, outside_uvi_line_y_start},
-        {outside_uvi_line_x_end, outside_uvi_line_y_start},
-        {outside_uvi_line_x_center, outside_uvi_line_y_start},
-        {outside_uvi_line_x_center, outside_uvi_line_y_end}
-    };
-
-    lv_style_t outside_uvi_line_style;
-    lv_style_init(&outside_uvi_line_style);
-    lv_style_set_line_width(&outside_uvi_line_style, 1);
-    lv_style_set_line_rounded(&outside_uvi_line_style, true);
-
-    lv_obj_t *outside_uvi_line;
-    outside_uvi_line = lv_line_create(lv_scr_act());
-    lv_line_set_points(outside_uvi_line, outside_uvi_line_points, 4);
-    lv_obj_add_style(outside_uvi_line, &outside_uvi_line_style, 0);
-    lv_obj_align(outside_uvi_line, LV_ALIGN_TOP_LEFT, 0, 0);
-
-    /*--------------------------------------*/
-    /* Outside ultraviolet index text label */
-    /*--------------------------------------*/
-    unsigned short outside_uvi_text_label_x = outside_uvi_line_x_start + outside_text_label_space_length,
-                outside_uvi_text_label_y = outside_winds_text_label_y;
-
-    lv_obj_t *outside_uvi_text_label = lv_label_create(lv_scr_act());
-    lv_label_set_text(outside_uvi_text_label, "UVI");
-    lv_obj_set_style_text_font(outside_uvi_text_label, &lv_font_montserrat_12, 0);
-    lv_obj_align(outside_uvi_text_label, LV_ALIGN_TOP_LEFT, outside_uvi_text_label_x, outside_uvi_text_label_y);
-
-    /*--------------------------------------*/
-    /* Outside ultraviolet index data label */
-    /*--------------------------------------*/
-    unsigned short outside_uvi_data_label_x = outside_uvi_line_x_start + 23,
-                outside_uvi_data_label_y = outside_temp_data_label_y;
-
-    lv_obj_t *outside_uvi_data_label = lv_label_create(lv_scr_act());
-    lv_label_set_text(outside_uvi_data_label, "4");
-    lv_obj_set_style_text_font(outside_uvi_data_label, &lv_font_montserrat_18, 0);
-    lv_obj_align(outside_uvi_data_label, LV_ALIGN_TOP_LEFT, outside_uvi_data_label_x, outside_uvi_data_label_y);
 
     /*---------------------*/
     /* Inside frame widget */
