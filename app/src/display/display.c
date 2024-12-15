@@ -474,47 +474,37 @@ void display_handler(void *, void *, void *)
     lv_obj_set_style_text_font(outside_uvi_data_label, &lv_font_montserrat_18, 0);
     lv_obj_align(outside_uvi_data_label, LV_ALIGN_TOP_LEFT, outside_uvi_data_label_x, outside_uvi_data_label_y);
 
-    /*--------------------*/
-    /* Inside frame label */
-    /*--------------------*/
+    /*---------------------*/
+    /* Inside frame widget */
+    /*---------------------*/
+    struct frame_widget inside_frame_widget = {
+        .text = "Inside",
+        .color = font_color,
+    };
 
-    lv_obj_t *inside_frame_label;
-    inside_frame_label = lv_label_create(lv_scr_act());
-    lv_label_set_text(inside_frame_label, "Inside");
-    lv_obj_align(inside_frame_label, LV_ALIGN_TOP_LEFT, 20, 125);
+    frame_widget_create(
+        &inside_frame_widget,
+        SCR_BORDER_OPACITY,
+        (SCR_HEIGHT / 2) + SCR_BORDER_OPACITY,
+        (SCR_WIDTH - SCR_BORDER_OPACITY) / 2,
+        SCR_HEIGHT - SCR_BORDER_OPACITY
+    );
 
-    lv_point_t inside_frame_line_points[] = { {18, 133}, {10, 133}, {10, 230}, {150, 230}, {150, 133}, {66, 133} };
-    lv_style_t inside_frame_line_style;
-    lv_style_init(&inside_frame_line_style);
-    lv_style_set_line_width(&inside_frame_line_style, 2);
-    lv_style_set_line_rounded(&inside_frame_line_style, true);
+    /*-------------------*/
+    /* Time frame widget */
+    /*-------------------*/
+    struct frame_widget time_frame_widget = {
+        .text = "Time",
+        .color = font_color,
+    };
 
-    lv_obj_t *inside_frame_line;
-    inside_frame_line = lv_line_create(lv_scr_act());
-    lv_line_set_points(inside_frame_line, inside_frame_line_points, 6);
-    lv_obj_add_style(inside_frame_line, &inside_frame_line_style, 0);
-    lv_obj_align(inside_frame_line, LV_ALIGN_TOP_LEFT, 0, 0);
-
-    /*--------------------*/
-    /* Time frame label */
-    /*--------------------*/
-
-    lv_obj_t *time_frame_label;
-    time_frame_label = lv_label_create(lv_scr_act());
-    lv_label_set_text(time_frame_label, "Time");
-    lv_obj_align(time_frame_label, LV_ALIGN_TOP_LEFT, 180, 125);
-
-    lv_point_t time_frame_line_points[] = { {178, 133}, {170, 133}, {170, 230}, {310, 230}, {310, 133}, {218, 133} };
-    lv_style_t time_frame_line_style;
-    lv_style_init(&time_frame_line_style);
-    lv_style_set_line_width(&time_frame_line_style, 2);
-    lv_style_set_line_rounded(&time_frame_line_style, true);
-
-    lv_obj_t *time_frame_line;
-    time_frame_line = lv_line_create(lv_scr_act());
-    lv_line_set_points(time_frame_line, time_frame_line_points, 6);
-    lv_obj_add_style(time_frame_line, &time_frame_line_style, 0);
-    lv_obj_align(time_frame_line, LV_ALIGN_TOP_LEFT, 0, 0); 
+    frame_widget_create(
+        &time_frame_widget,
+        (SCR_WIDTH + SCR_BORDER_OPACITY) / 2,
+        (SCR_HEIGHT / 2) + SCR_BORDER_OPACITY,
+        SCR_WIDTH - SCR_BORDER_OPACITY,
+        SCR_HEIGHT - SCR_BORDER_OPACITY
+    );
 
     /*-------------------------------------*/
     /* The end of widgets creating section */
