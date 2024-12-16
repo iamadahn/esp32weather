@@ -141,13 +141,15 @@ static void frame_widget_create(struct frame_widget *widget,
 
 static void data_widget_create(struct data_widget *widget,
                                unsigned int x_start,
-                               unsigned int y_start)
+                               unsigned int y_start,
+                               unsigned int x_end,
+                               unsigned int y_end)
 {
     /*-----------*/
     /* Main line */
     /*-----------*/
-    unsigned char main_line_x_length = 62,
-        main_line_y_length = 25;
+    unsigned char main_line_x_length = x_end - x_start,
+        main_line_y_length = y_end - y_start;
     widget->length = main_line_x_length;
 
     unsigned int main_line_x_start = x_start,
@@ -281,8 +283,8 @@ void display_handler(void *, void *, void *)
     /*--------------------*/
     /* Frame-realted vars */
     /*--------------------*/
-    unsigned char frame_label_opacity = 2,
-        frame_scr_border_opacity = 10;
+    unsigned char data_widget_x_length = 62,
+        data_widget_y_length = 25;
 
     struct frame_widget outside_frame_widget = {
         .text = "Outside",
@@ -300,8 +302,10 @@ void display_handler(void *, void *, void *)
     /*---------------------------------*/
     /* Outside temperature data widget */
     /*---------------------------------*/
-    unsigned int outside_temp_data_widget_x = SCR_BORDER_OPACITY * 2,
-            outside_temp_data_widget_y = SCR_BORDER_OPACITY * 3;
+    unsigned int outside_temp_data_widget_x_start = SCR_BORDER_OPACITY * 2,
+        outside_temp_data_widget_y_start = SCR_BORDER_OPACITY * 3,
+        outside_temp_data_widget_x_end = outside_temp_data_widget_x_start + data_widget_x_length,
+        outside_temp_data_widget_y_end = outside_temp_data_widget_y_start + data_widget_y_length;
 
     struct data_widget outside_temp_data_widget = {
         .text = "Temp",
@@ -310,15 +314,19 @@ void display_handler(void *, void *, void *)
 
     data_widget_create(
         &outside_temp_data_widget,
-        outside_temp_data_widget_x,
-        outside_temp_data_widget_y
+        outside_temp_data_widget_x_start,
+        outside_temp_data_widget_y_start,
+        outside_temp_data_widget_x_end,
+        outside_temp_data_widget_y_end
     );
 
     /*------------------------------*/
     /* Outside humidity data widget */
     /*------------------------------*/
-    unsigned int outside_hmdty_data_widget_x = outside_temp_data_widget_x + outside_temp_data_widget.length + SCR_BORDER_OPACITY,
-            outside_hmdty_data_widget_y = outside_temp_data_widget_y;
+    unsigned int outside_hmdty_data_widget_x_start = outside_temp_data_widget_x_end + SCR_BORDER_OPACITY,
+        outside_hmdty_data_widget_y_start = outside_temp_data_widget_y_start,
+        outside_hmdty_data_widget_x_end = outside_hmdty_data_widget_x_start + data_widget_x_length,
+        outside_hmdty_data_widget_y_end = outside_hmdty_data_widget_y_start + data_widget_y_length;
 
     struct data_widget outside_hmdty_data_widget = {
         .text = "Hmd",
@@ -327,15 +335,19 @@ void display_handler(void *, void *, void *)
 
     data_widget_create(
         &outside_hmdty_data_widget,
-        outside_hmdty_data_widget_x,
-        outside_hmdty_data_widget_y
+        outside_hmdty_data_widget_x_start,
+        outside_hmdty_data_widget_y_start,
+        outside_hmdty_data_widget_x_end,
+        outside_hmdty_data_widget_y_end
     ); 
 
     /*--------------------------------*/
     /* Outside wind speed data widget */
     /*--------------------------------*/
-    unsigned int outside_winds_data_widget_x = outside_hmdty_data_widget_x + outside_hmdty_data_widget.length + SCR_BORDER_OPACITY + 1,
-            outside_winds_data_widget_y = outside_hmdty_data_widget_y;
+    unsigned int outside_winds_data_widget_x_start = outside_hmdty_data_widget_x_end + SCR_BORDER_OPACITY + 1,
+        outside_winds_data_widget_y_start = outside_hmdty_data_widget_y_start,
+        outside_winds_data_widget_x_end = outside_winds_data_widget_x_start + data_widget_x_length,
+        outside_winds_data_widget_y_end = outside_winds_data_widget_y_start + data_widget_y_length;
 
     struct data_widget outside_winds_data_widget = {
         .text = "Wind",
@@ -344,15 +356,19 @@ void display_handler(void *, void *, void *)
 
     data_widget_create(
         &outside_winds_data_widget,
-        outside_winds_data_widget_x,
-        outside_winds_data_widget_y
+        outside_winds_data_widget_x_start,
+        outside_winds_data_widget_y_start,
+        outside_winds_data_widget_x_end,
+        outside_winds_data_widget_y_end
     ); 
 
     /*---------------------------------------*/
     /* Outside ultraviolet index data widget */
     /*---------------------------------------*/
-    unsigned int outside_uvi_data_widget_x = outside_winds_data_widget_x + outside_winds_data_widget.length + SCR_BORDER_OPACITY,
-            outside_uvi_data_widget_y = outside_winds_data_widget_y;
+    unsigned int outside_uvi_data_widget_x_start = outside_winds_data_widget_x_end + SCR_BORDER_OPACITY,
+        outside_uvi_data_widget_y_start = outside_winds_data_widget_y_start,
+        outside_uvi_data_widget_x_end = outside_uvi_data_widget_x_start + data_widget_x_length,
+        outside_uvi_data_widget_y_end = outside_uvi_data_widget_y_start + data_widget_y_length;
 
     struct data_widget outside_uvi_data_widget = {
         .text = "Uvi",
@@ -361,8 +377,10 @@ void display_handler(void *, void *, void *)
 
     data_widget_create(
         &outside_uvi_data_widget,
-        outside_uvi_data_widget_x,
-        outside_uvi_data_widget_y
+        outside_uvi_data_widget_x_start,
+        outside_uvi_data_widget_y_start,
+        outside_uvi_data_widget_x_end,
+        outside_uvi_data_widget_y_end
     );
 
     /*---------------------*/
