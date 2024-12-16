@@ -78,7 +78,6 @@ static lv_obj_t* label_create(char *text, const lv_font_t *font, lv_color_t colo
 
 static lv_obj_t* line_create(lv_point_t *points, lv_style_t *style, lv_color_t color, unsigned char width, unsigned char points_num)
 {
-    lv_style_init(style);
     lv_style_set_line_width(style, width);
     lv_style_set_line_rounded(style, true);
 
@@ -136,6 +135,7 @@ static void frame_widget_create(struct frame_widget *widget,
     widget->line_points[5].x = line_x_end;
     widget->line_points[5].y = y_start;
 
+    lv_style_init(&widget->style);
     lv_obj_t *line = line_create(widget->line_points, &widget->style, widget->color, 2, 6);
 }
 
@@ -148,6 +148,7 @@ static void data_widget_create(struct data_widget *widget,
     /*-----------*/
     unsigned char main_line_x_length = 62,
         main_line_y_length = 25;
+    widget->length = main_line_x_length;
 
     unsigned int main_line_x_start = x_start,
         main_line_x_end = main_line_x_start + main_line_x_length,
