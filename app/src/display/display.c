@@ -48,6 +48,17 @@ struct data_widget {
     unsigned int length;
 };
 
+struct data_min_widget {
+    char *text;
+    lv_obj_t *data_label;
+    lv_point_t left_line_points[3];
+    lv_point_t right_line_points[3];
+    lv_point_t bottom_line_points[2];
+    lv_style_t style;
+    lv_color_t color;
+    unsigned int length;
+};
+
 static unsigned char scr_pressed = 0;
 
 extern struct k_msgq temperature_inside_msgq,
@@ -246,6 +257,82 @@ static void data_widget_create(struct data_widget *widget,
     widget->data_max_label = label_create(data_label_text, &jetbrains_12, widget->color, data_max_label_x, data_max_label_y);
 }
 
+static void data_min_widget_create(struct data_min_widget *widget,
+                                   unsigned int x_start,
+                                   unsigned int y_start,
+                                   unsigned int x_end,
+                                   unsigned int y_end)
+{
+    /*------------*/
+    /* Text label */
+    /*------------*/
+    unsigned char label_pixel_size = strlen(widget->text) * JETBRAINS_12_WIDTH;
+    unsigned char label_space_length = 5;
+    unsigned char label_opacity = 2;
+
+    unsigned int text_label_x = x_start + label_space_length + label_opacity,
+        text_label_y = y_start;
+
+    lv_style_init(&widget->style);
+
+    lv_obj_t *text_label = label_create(widget->text, &jetbrains_12, widget->color, text_label_x, text_label_y);
+
+    /*-----------*/
+    /* Left line */
+    /*-----------*/
+    unsigned int left_line_x_start = text_label_x - label_opacity,
+        left_line_y_start = text_label_y + 4;
+
+    widget->left_line_points[0].x = left_line_x_start;
+    widget->left_line_points[0].y = left_line_y_start;
+
+    widget->left_line_points[1].x = x_start;
+    widget->left_line_points[1].y = left_line_y_start;
+
+    widget->left_line_points[2].x = x_start;
+    widget->left_line_points[2].y = left_line_y_start + label_space_length;
+
+    lv_obj_t *left_out_line = line_create(widget->left_line_points, &widget->style, widget->color, 1, 3);
+
+    /*------------*/
+    /* Right line */
+    /*------------*/
+    unsigned int right_line_x_start = text_label_x + label_pixel_size + label_opacity,
+        right_line_y_start = text_label_y + 4;
+
+    widget->right_line_points[0].x = right_line_x_start;
+    widget->right_line_points[0].y = right_line_y_start;
+
+    widget->right_line_points[1].x = x_end;
+    widget->right_line_points[1].y = right_line_y_start;
+
+    widget->right_line_points[2].x = x_end;
+    widget->right_line_points[2].y = right_line_y_start + label_space_length;
+
+    lv_obj_t *right_out_line = line_create(widget->right_line_points, &widget->style, widget->color, 1, 3);
+
+    /*-------------*/
+    /* Bottom line */
+    /*-------------*/
+    widget->bottom_line_points[0].x = x_start;
+    widget->bottom_line_points[0].y = y_end;
+
+    widget->bottom_line_points[1].x = x_end;
+    widget->bottom_line_points[1].y = y_end;
+
+    lv_obj_t *bottom_out_line = line_create(widget->bottom_line_points, &widget->style, widget->color, 1, 2);
+
+    /*------------*/
+    /* Data label */
+    /*------------*/
+    char* data_label_text = "0";
+    unsigned int data_label_x = x_start,
+                data_label_y = y_end - (SCR_BORDER_OPACITY * 3);
+
+    widget->data_label = label_create(data_label_text, &lv_font_montserrat_28, widget->color, data_label_x, data_label_y);
+
+}
+
 void display_handler(void *, void *, void *)
 {
     const struct device *display_dev;
@@ -398,6 +485,42 @@ void display_handler(void *, void *, void *)
         (SCR_WIDTH - SCR_BORDER_OPACITY) / 2,
         SCR_HEIGHT - SCR_BORDER_OPACITY
     );
+
+    /*---------------------------*/
+    /* Inside temperature widget */
+    /*---------------------------*/
+    struct data_min_widget inside_temp_widget = {
+        .text = "Temp",
+        .color = font_color,
+    };
+
+    data_min_widget_create(
+        &inside_temp_widget,
+        SCR_BORDER_OPACITY * 2,
+        (SCR_HEIGHT / 2) + (SCR_BORDER_OPACITY * 3),
+        (SCR_BORDER_OPACITY * 2) + 55,
+        (SCR_HEIGHT / 2) + (SCR_BORDER_OPACITY * 8)
+    );
+
+    lv_label_set_text(inside_temp_widget.data_label, "30°");
+
+    /*------------------------*/
+    /* Inside humidity widget */
+    /*------------------------*/
+    struct data_min_widget inside_hmdty_widget = {
+        .text = "Hmd",
+        .color = font_color,
+    };
+
+    data_min_widget_create(
+        &inside_hmdty_widget,
+        (SCR_BORDER_OPACITY * 3) + 60,
+        (SCR_HEIGHT / 2) + (SCR_BORDER_OPACITY * 3),
+        (SCR_BORDER_OPACITY * 3) + 112,
+        (SCR_HEIGHT / 2) + (SCR_BORDER_OPACITY * 8)
+    );
+
+    lv_label_set_text(inside_hmdty_widget.data_label, "50%");
 
     /*-------------------*/
     /* Time frame widget */
