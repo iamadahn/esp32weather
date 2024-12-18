@@ -59,13 +59,21 @@ struct data_min_widget {
     unsigned int length;
 };
 
+struct time_and_date_widget {
+    lv_obj_t *time_label;
+    lv_obj_t *date_label;
+    lv_obj_t *day_label;
+    lv_style_t style;
+    lv_color_t color;
+};
+
 static unsigned char scr_pressed = 0;
 
 extern struct k_msgq temperature_inside_msgq,
-                        humidity_inside_msgq,
-                        temperature_outside_msgq,
-                        forecast_async_state_msgq,
-                        humidity_outside_msgq;
+    humidity_inside_msgq,
+    temperature_outside_msgq,
+    forecast_async_state_msgq,
+    humidity_outside_msgq;
 
 
 static lv_obj_t *forecast_scr, *wife_scr;
@@ -236,7 +244,7 @@ static void data_widget_create(struct data_widget *widget,
     /*--------------------*/
     char* data_label_text = "test";
     unsigned int data_current_label_x = main_line_x_start + 10,
-                data_current_label_y = text_label_y + (SCR_BORDER_OPACITY * 1.5f) + label_opacity;
+        data_current_label_y = text_label_y + (SCR_BORDER_OPACITY * 1.5f) + label_opacity;
 
     widget->data_current_label = label_create(data_label_text, &jetbrains_18, widget->color, data_current_label_x, data_current_label_y);
 
@@ -244,7 +252,7 @@ static void data_widget_create(struct data_widget *widget,
     /* Min data label */
     /*----------------*/
     unsigned int data_min_label_x = main_line_x_start + 5,
-                data_min_label_y = main_line_y_start + 7;
+        data_min_label_y = main_line_y_start + 7;
 
     widget->data_min_label = label_create(data_label_text, &jetbrains_12, widget->color, data_min_label_x, data_min_label_y);
 
@@ -252,7 +260,7 @@ static void data_widget_create(struct data_widget *widget,
     /* Max data label */
     /*----------------*/
     unsigned int data_max_label_x = main_line_x_center + label_opacity,
-                data_max_label_y = main_line_y_start + 7;
+        data_max_label_y = main_line_y_start + 7;
 
     widget->data_max_label = label_create(data_label_text, &jetbrains_12, widget->color, data_max_label_x, data_max_label_y);
 }
@@ -327,10 +335,36 @@ static void data_min_widget_create(struct data_min_widget *widget,
     /*------------*/
     char* data_label_text = "0";
     unsigned int data_label_x = x_start,
-                data_label_y = y_end - (SCR_BORDER_OPACITY * 3);
+        data_label_y = y_end - (SCR_BORDER_OPACITY * 3);
 
     widget->data_label = label_create(data_label_text, &lv_font_montserrat_28, widget->color, data_label_x, data_label_y);
 
+}
+
+static void time_and_date_widget_create(struct time_and_date_widget *widget,
+                                        unsigned int x_start,
+                                        unsigned int y_start)
+{
+    /*------------*/
+    /* Time label */
+    /*------------*/
+    char* time_label_text = "13:37";
+
+    widget->time_label = label_create(time_label_text, &lv_font_montserrat_28, widget->color, x_start + (SCR_BORDER_OPACITY * 3), y_start);
+
+    /*------------*/
+    /* Date label */
+    /*------------*/
+    char* date_label_text = "28.06.2021";
+
+    widget->date_label = label_create(date_label_text, &lv_font_montserrat_24, widget->color, x_start, y_start + (SCR_BORDER_OPACITY * 2.5f));
+
+    /*-----------*/
+    /* Day label */
+    /*-----------*/
+    char* day_label_text = "Saturday";
+
+    widget->day_label = label_create(day_label_text, &lv_font_montserrat_24, widget->color, x_start + 5, y_start + (SCR_BORDER_OPACITY * 4.5f));
 }
 
 void display_handler(void *, void *, void *)
@@ -536,6 +570,19 @@ void display_handler(void *, void *, void *)
         (SCR_HEIGHT / 2) + SCR_BORDER_OPACITY,
         SCR_WIDTH - SCR_BORDER_OPACITY,
         SCR_HEIGHT - SCR_BORDER_OPACITY
+    );
+
+    /*----------------------*/
+    /* Time and date widget */
+    /*----------------------*/
+    struct time_and_date_widget time_and_date_widget_instance = {
+        .color = font_color,
+    };
+
+    time_and_date_widget_create(
+        &time_and_date_widget_instance,
+        (SCR_WIDTH / 2) + (SCR_BORDER_OPACITY * 2),
+        (SCR_HEIGHT / 2) + (SCR_BORDER_OPACITY * 2.5f)
     );
 
     /*-------------------------------------*/
