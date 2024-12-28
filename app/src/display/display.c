@@ -29,13 +29,16 @@ LV_FONT_DECLARE(jetbrains_14);
 LV_FONT_DECLARE(jetbrains_18);
 
 struct frame_widget {
+    lv_obj_t *parent;
     char *text;
     lv_point_t line_points[6];
     lv_style_t style;
     lv_color_t color;
+    lv_align_t align;
 };
 
 struct data_widget {
+    lv_obj_t *parent;
     char *text;
     lv_obj_t *data_current_label;
     lv_obj_t *data_min_label;
@@ -46,9 +49,11 @@ struct data_widget {
     lv_style_t style;
     lv_color_t color;
     unsigned int length;
+    lv_align_t align;
 };
 
 struct data_min_widget {
+    lv_obj_t *parent;
     char *text;
     lv_obj_t *data_label;
     lv_point_t left_line_points[3];
@@ -57,14 +62,17 @@ struct data_min_widget {
     lv_style_t style;
     lv_color_t color;
     unsigned int length;
+    lv_align_t align;
 };
 
 struct time_and_date_widget {
+    lv_obj_t* parent;
     lv_obj_t *time_label;
     lv_obj_t *date_label;
     lv_obj_t *day_label;
     lv_style_t style;
     lv_color_t color;
+    lv_align_t align;
 };
 
 static unsigned char scr_pressed = 0;
@@ -84,18 +92,31 @@ static void scr_pressed_cb(lv_event_t *event)
     printf("Clicked on screen!\n");
 }
 
-static lv_obj_t* label_create(char *text, const lv_font_t *font, lv_color_t color, unsigned short x, unsigned short y) {
+static lv_obj_t* label_create(char *text,
+                              const lv_font_t *font,
+                              lv_color_t color,
+                              lv_align_t align,
+                              unsigned short x,
+                              unsigned short y)
+{
     lv_obj_t* label;
     label = lv_label_create(lv_scr_act());
     lv_label_set_text(label, text);
     lv_obj_set_style_text_font(label, font, 0);
     lv_obj_set_style_text_color(label, color, 0);
-    lv_obj_align(label, LV_ALIGN_TOP_LEFT, x, y);
+    lv_obj_align(label, align, x, y);
 
     return label;
 }
 
-static lv_obj_t* line_create(lv_point_t *points, lv_style_t *style, lv_color_t color, unsigned char width, unsigned char points_num)
+static lv_obj_t* line_create(lv_point_t *points,
+                             lv_style_t *style,
+                             lv_color_t color,
+                             unsigned char width,
+                             unsigned char points_num,
+                             lv_align_t align,
+                             unsigned int x,
+                             unsigned int y)
 {
     lv_style_set_line_width(style, width);
     lv_style_set_line_rounded(style, true);
@@ -104,7 +125,7 @@ static lv_obj_t* line_create(lv_point_t *points, lv_style_t *style, lv_color_t c
     line = lv_line_create(lv_scr_act());
     lv_line_set_points(line, points, points_num);
     lv_obj_add_style(line, style, 0);
-    lv_obj_align(line, LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_obj_align(line, align, x, y);
 
     return line;
 }
@@ -129,6 +150,7 @@ static void frame_widget_create(struct frame_widget *widget,
         widget->text,
         &jetbrains_14,
         widget->color,
+        widget->align,
         label_x_start,
         label_y_start
     );
@@ -155,7 +177,7 @@ static void frame_widget_create(struct frame_widget *widget,
     widget->line_points[5].y = y_start;
 
     lv_style_init(&widget->style);
-    lv_obj_t *line = line_create(widget->line_points, &widget->style, widget->color, 2, 6);
+    lv_obj_t *line = line_create(widget->line_points, &widget->style, widget->color, 2, 6, widget->align, 0, 0);
 }
 
 static void data_widget_create(struct data_widget *widget,
@@ -191,7 +213,7 @@ static void data_widget_create(struct data_widget *widget,
     widget->main_line_points[3].y = main_line_y_end;
 
     lv_style_init(&widget->style);
-    lv_obj_t *main_line = line_create(widget->main_line_points, &widget->style, widget->color, 1, 4);
+    lv_obj_t *main_line = line_create(widget->main_line_points, &widget->style, widget->color, 1, 4, widget->align, 0, 0);
 
     /*------------*/
     /* Text label */
@@ -203,7 +225,7 @@ static void data_widget_create(struct data_widget *widget,
     unsigned int text_label_x = main_line_x_start + label_space_length + label_opacity,
         text_label_y = y_start;
 
-    lv_obj_t *text_label = label_create(widget->text, &jetbrains_12, widget->color, text_label_x, text_label_y);
+    lv_obj_t *text_label = label_create(widget->text, &jetbrains_12, widget->color, widget->align, text_label_x, text_label_y);
 
     /*-----------*/
     /* Left line */
@@ -220,7 +242,7 @@ static void data_widget_create(struct data_widget *widget,
     widget->left_line_points[2].x = main_line_x_start;
     widget->left_line_points[2].y = left_line_y_start + label_space_length;
 
-    lv_obj_t *left_out_line = line_create(widget->left_line_points, &widget->style, widget->color, 1, 3);
+    lv_obj_t *left_out_line = line_create(widget->left_line_points, &widget->style, widget->color, 1, 3, widget->align, 0, 0);
 
     /*------------*/
     /* Right line */
@@ -237,7 +259,7 @@ static void data_widget_create(struct data_widget *widget,
     widget->right_line_points[2].x = main_line_x_end;
     widget->right_line_points[2].y = right_line_y_start + label_space_length;
 
-    lv_obj_t *right_out_line = line_create(widget->right_line_points, &widget->style, widget->color, 1, 3);
+    lv_obj_t *right_out_line = line_create(widget->right_line_points, &widget->style, widget->color, 1, 3, widget->align, 0, 0);
 
     /*--------------------*/
     /* Current data label */
@@ -246,7 +268,7 @@ static void data_widget_create(struct data_widget *widget,
     unsigned int data_current_label_x = main_line_x_start + 10,
         data_current_label_y = text_label_y + (SCR_BORDER_OPACITY * 1.5f) + label_opacity;
 
-    widget->data_current_label = label_create(data_label_text, &jetbrains_18, widget->color, data_current_label_x, data_current_label_y);
+    widget->data_current_label = label_create(data_label_text, &jetbrains_18, widget->color, widget->align, data_current_label_x, data_current_label_y);
 
     /*----------------*/
     /* Min data label */
@@ -254,7 +276,7 @@ static void data_widget_create(struct data_widget *widget,
     unsigned int data_min_label_x = main_line_x_start + 5,
         data_min_label_y = main_line_y_start + 7;
 
-    widget->data_min_label = label_create(data_label_text, &jetbrains_12, widget->color, data_min_label_x, data_min_label_y);
+    widget->data_min_label = label_create(data_label_text, &jetbrains_12, widget->color, widget->align, data_min_label_x, data_min_label_y);
 
     /*----------------*/
     /* Max data label */
@@ -262,7 +284,7 @@ static void data_widget_create(struct data_widget *widget,
     unsigned int data_max_label_x = main_line_x_center + label_opacity,
         data_max_label_y = main_line_y_start + 7;
 
-    widget->data_max_label = label_create(data_label_text, &jetbrains_12, widget->color, data_max_label_x, data_max_label_y);
+    widget->data_max_label = label_create(data_label_text, &jetbrains_12, widget->color, widget->align, data_max_label_x, data_max_label_y);
 }
 
 static void data_min_widget_create(struct data_min_widget *widget,
@@ -283,7 +305,7 @@ static void data_min_widget_create(struct data_min_widget *widget,
 
     lv_style_init(&widget->style);
 
-    lv_obj_t *text_label = label_create(widget->text, &jetbrains_12, widget->color, text_label_x, text_label_y);
+    lv_obj_t *text_label = label_create(widget->text, &jetbrains_12, widget->color, widget->align, text_label_x, text_label_y);
 
     /*-----------*/
     /* Left line */
@@ -300,7 +322,7 @@ static void data_min_widget_create(struct data_min_widget *widget,
     widget->left_line_points[2].x = x_start;
     widget->left_line_points[2].y = left_line_y_start + label_space_length;
 
-    lv_obj_t *left_out_line = line_create(widget->left_line_points, &widget->style, widget->color, 1, 3);
+    lv_obj_t *left_out_line = line_create(widget->left_line_points, &widget->style, widget->color, 1, 3, widget->align, 0, 0);
 
     /*------------*/
     /* Right line */
@@ -317,7 +339,7 @@ static void data_min_widget_create(struct data_min_widget *widget,
     widget->right_line_points[2].x = x_end;
     widget->right_line_points[2].y = right_line_y_start + label_space_length;
 
-    lv_obj_t *right_out_line = line_create(widget->right_line_points, &widget->style, widget->color, 1, 3);
+    lv_obj_t *right_out_line = line_create(widget->right_line_points, &widget->style, widget->color, 1, 3, widget->align, 0, 0);
 
     /*-------------*/
     /* Bottom line */
@@ -328,7 +350,7 @@ static void data_min_widget_create(struct data_min_widget *widget,
     widget->bottom_line_points[1].x = x_end;
     widget->bottom_line_points[1].y = y_end;
 
-    lv_obj_t *bottom_out_line = line_create(widget->bottom_line_points, &widget->style, widget->color, 1, 2);
+    lv_obj_t *bottom_out_line = line_create(widget->bottom_line_points, &widget->style, widget->color, 1, 2, widget->align, 0, 0);
 
     /*------------*/
     /* Data label */
@@ -337,7 +359,7 @@ static void data_min_widget_create(struct data_min_widget *widget,
     unsigned int data_label_x = x_start,
         data_label_y = y_end - (SCR_BORDER_OPACITY * 3);
 
-    widget->data_label = label_create(data_label_text, &lv_font_montserrat_28, widget->color, data_label_x, data_label_y);
+    widget->data_label = label_create(data_label_text, &lv_font_montserrat_28, widget->color, widget->align, data_label_x, data_label_y);
 
 }
 
@@ -350,21 +372,21 @@ static void time_and_date_widget_create(struct time_and_date_widget *widget,
     /*------------*/
     char* time_label_text = "13:37";
 
-    widget->time_label = label_create(time_label_text, &lv_font_montserrat_28, widget->color, x_start + (SCR_BORDER_OPACITY * 3), y_start);
+    widget->time_label = label_create(time_label_text, &lv_font_montserrat_28, widget->color, widget->align, x_start + (SCR_BORDER_OPACITY * 3), y_start);
 
     /*------------*/
     /* Date label */
     /*------------*/
     char* date_label_text = "28.06.2021";
 
-    widget->date_label = label_create(date_label_text, &lv_font_montserrat_24, widget->color, x_start, y_start + (SCR_BORDER_OPACITY * 2.5f));
+    widget->date_label = label_create(date_label_text, &lv_font_montserrat_24, widget->color, widget->align, x_start, y_start + (SCR_BORDER_OPACITY * 2.5f));
 
     /*-----------*/
     /* Day label */
     /*-----------*/
     char* day_label_text = "Saturday";
 
-    widget->day_label = label_create(day_label_text, &lv_font_montserrat_24, widget->color, x_start + 5, y_start + (SCR_BORDER_OPACITY * 4.5f));
+    widget->day_label = label_create(day_label_text, &lv_font_montserrat_24, widget->color, widget->align, x_start + 5, y_start + (SCR_BORDER_OPACITY * 4.5f));
 }
 
 void display_handler(void *, void *, void *)
@@ -410,6 +432,7 @@ void display_handler(void *, void *, void *)
     struct frame_widget outside_frame_widget = {
         .text = "Outside",
         .color = font_color,
+        .align = LV_ALIGN_TOP_LEFT,
     };
 
     frame_widget_create(
@@ -431,6 +454,7 @@ void display_handler(void *, void *, void *)
     struct data_widget outside_temp_data_widget = {
         .text = "Temp",
         .color = font_color,
+        .align = LV_ALIGN_TOP_LEFT,
     };
 
     data_widget_create(
@@ -452,6 +476,7 @@ void display_handler(void *, void *, void *)
     struct data_widget outside_hmdty_data_widget = {
         .text = "Hmd",
         .color = font_color,
+        .align = LV_ALIGN_TOP_LEFT,
     };
 
     data_widget_create(
@@ -473,6 +498,7 @@ void display_handler(void *, void *, void *)
     struct data_widget outside_winds_data_widget = {
         .text = "Wind",
         .color = font_color,
+        .align = LV_ALIGN_TOP_LEFT,
     };
 
     data_widget_create(
@@ -494,6 +520,7 @@ void display_handler(void *, void *, void *)
     struct data_widget outside_uvi_data_widget = {
         .text = "Uvi",
         .color = font_color,
+        .align = LV_ALIGN_TOP_LEFT,
     };
 
     data_widget_create(
@@ -510,6 +537,7 @@ void display_handler(void *, void *, void *)
     struct frame_widget inside_frame_widget = {
         .text = "Inside",
         .color = font_color,
+        .align = LV_ALIGN_TOP_LEFT,
     };
 
     frame_widget_create(
@@ -526,6 +554,7 @@ void display_handler(void *, void *, void *)
     struct data_min_widget inside_temp_widget = {
         .text = "Temp",
         .color = font_color,
+        .align = LV_ALIGN_TOP_LEFT,
     };
 
     data_min_widget_create(
@@ -544,6 +573,7 @@ void display_handler(void *, void *, void *)
     struct data_min_widget inside_hmdty_widget = {
         .text = "Hmd",
         .color = font_color,
+        .align = LV_ALIGN_TOP_LEFT,
     };
 
     data_min_widget_create(
@@ -562,6 +592,7 @@ void display_handler(void *, void *, void *)
     struct frame_widget time_frame_widget = {
         .text = "Time",
         .color = font_color,
+        .align = LV_ALIGN_TOP_LEFT,
     };
 
     frame_widget_create(
@@ -577,6 +608,7 @@ void display_handler(void *, void *, void *)
     /*----------------------*/
     struct time_and_date_widget time_and_date_widget_instance = {
         .color = font_color,
+        .align = LV_ALIGN_TOP_LEFT,
     };
 
     time_and_date_widget_create(
