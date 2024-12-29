@@ -30,6 +30,7 @@ LV_FONT_DECLARE(jetbrains_18);
 
 struct frame_widget {
     lv_obj_t *parent;
+    lv_obj_t *self;
     char *text;
     lv_point_t line_points[6];
     lv_style_t style;
@@ -39,6 +40,7 @@ struct frame_widget {
 
 struct data_widget {
     lv_obj_t *parent;
+    lv_obj_t *self;
     char *text;
     lv_obj_t *data_current_label;
     lv_obj_t *data_min_label;
@@ -54,6 +56,7 @@ struct data_widget {
 
 struct data_min_widget {
     lv_obj_t *parent;
+    lv_obj_t *self;
     char *text;
     lv_obj_t *data_label;
     lv_point_t left_line_points[3];
@@ -66,7 +69,8 @@ struct data_min_widget {
 };
 
 struct time_and_date_widget {
-    lv_obj_t* parent;
+    lv_obj_t *parent;
+    lv_obj_t *self;
     lv_obj_t *time_label;
     lv_obj_t *date_label;
     lv_obj_t *day_label;
