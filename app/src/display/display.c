@@ -34,7 +34,8 @@ struct frame_widget {
     char *text;
     lv_point_t line_points[6];
     lv_style_t style;
-    lv_color_t color;
+    lv_color_t bg_color;
+    lv_color_t font_color;
     lv_align_t align;
 };
 
@@ -143,57 +144,64 @@ static void frame_widget_create(struct frame_widget *widget,
                                 unsigned int y_end)
 {
     widget->self = lv_obj_create(widget->parent);
+    lv_obj_align(widget->self, LV_ALIGN_TOP_LEFT, x_start, y_start);
+    lv_obj_set_width(widget->self, SCR_WIDTH);
+    lv_obj_set_height(widget->self, SCR_HEIGHT / 2);
+    lv_obj_set_style_border_width(widget->self, 0, 0);
+    lv_obj_set_style_outline_width(widget->self, 0, 0);
+    lv_obj_set_style_outline_pad(widget->self, 0, 0);
+    lv_obj_set_style_pad_top(widget->self, 0, 0);
+    lv_obj_set_style_pad_left(widget->self, 0, 0);
+    lv_obj_set_style_radius(widget->self, 0, 0);
+    lv_obj_set_style_bg_color(widget->self, widget->bg_color, 0);
+    lv_obj_clear_flag(widget->self, LV_OBJ_FLAG_SCROLLABLE);
 
-    unsigned char label_opacity = 2;
+    unsigned char label_opacity = 5;
     unsigned char label_pixel_size = strlen(widget->text) * JETBRAINS_14_WIDTH;
-    unsigned int label_x_start = x_start + SCR_BORDER_OPACITY + label_opacity, label_y_start = 0;
-
-    if (y_start < 5) {
-        label_y_start = 0;
-    } else {
-        label_y_start = y_start - 5;
-    }
+    unsigned int label_x_start = SCR_BORDER_OPACITY + (label_opacity * 2), label_y_start = 5;
 
     lv_obj_t *label = label_create(widget->self,
                                    widget->text,
                                    &jetbrains_14,
-                                   widget->color,
+                                   widget->font_color,
                                    widget->align,
                                    label_x_start,
                                    label_y_start);
 
     unsigned short line_x_start = label_x_start - label_opacity,
-        line_x_end = label_x_start + label_pixel_size + label_opacity;
+        line_x_end = label_x_start + label_pixel_size + label_opacity,
+        line_y_start = SCR_BORDER_OPACITY,
+        line_y_end = y_end - SCR_BORDER_OPACITY;
 
     widget->line_points[0].x = line_x_start;
-    widget->line_points[0].y = y_start;
+    widget->line_points[0].y = line_y_start;
 
-    widget->line_points[1].x = x_start;
-    widget->line_points[1].y = y_start;
+    widget->line_points[1].x = SCR_BORDER_OPACITY;
+    widget->line_points[1].y = line_y_start;
 
-    widget->line_points[2].x = x_start;
-    widget->line_points[2].y = y_end;
+    widget->line_points[2].x = SCR_BORDER_OPACITY;
+    widget->line_points[2].y = line_y_end;
 
-    widget->line_points[3].x = x_end;
-    widget->line_points[3].y = y_end;
+    widget->line_points[3].x = x_end - SCR_BORDER_OPACITY;
+    widget->line_points[3].y = line_y_end;
 
-    widget->line_points[4].x = x_end;
-    widget->line_points[4].y = y_start;
+    widget->line_points[4].x = x_end - SCR_BORDER_OPACITY;
+    widget->line_points[4].y = line_y_start;
 
     widget->line_points[5].x = line_x_end;
-    widget->line_points[5].y = y_start;
+    widget->line_points[5].y = line_y_start;
 
     lv_style_init(&widget->style);
     lv_obj_t *line = line_create(widget->self,
                                  widget->line_points,
                                  &widget->style,
-                                 widget->color,
+                                 widget->font_color,
                                  2,
                                  6,
                                  widget->align,
                                  0,
                                  0);
-}
+} 
 
 static void data_widget_create(struct data_widget *widget,
                                unsigned int x_start,
@@ -538,6 +546,9 @@ void display_handler(void *, void *, void *)
     lv_scr_load(forecast_scr);
     lv_obj_add_event_cb(forecast_scr, scr_pressed_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_set_style_bg_color(lv_scr_act(), background_color, 0);
+    lv_obj_set_style_border_width(forecast_scr, 0, 0);
+    lv_obj_set_style_outline_width(forecast_scr, 0, 0);
+    lv_obj_clear_flag(forecast_scr, LV_OBJ_FLAG_SCROLLABLE);
 
     /*--------------------*/
     /* Frame-realted vars */
@@ -548,16 +559,17 @@ void display_handler(void *, void *, void *)
     struct frame_widget outside_frame_widget = {
         .parent = lv_scr_act(),
         .text = "Outside",
-        .color = font_color,
+        .bg_color = background_color,
+        .font_color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
     };
 
     frame_widget_create(
         &outside_frame_widget,
-        SCR_BORDER_OPACITY,
-        SCR_BORDER_OPACITY,
-        SCR_WIDTH - SCR_BORDER_OPACITY,
-        (SCR_HEIGHT - SCR_BORDER_OPACITY) / 2
+        0,
+        0,
+        SCR_WIDTH,
+        SCR_HEIGHT / 2
     );
 
     /*---------------------------------*/
@@ -658,16 +670,17 @@ void display_handler(void *, void *, void *)
     struct frame_widget inside_frame_widget = {
         .parent = lv_scr_act(),
         .text = "Inside",
-        .color = font_color,
+        .bg_color = background_color,
+        .font_color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
     };
 
     frame_widget_create(
         &inside_frame_widget,
-        SCR_BORDER_OPACITY,
-        (SCR_HEIGHT / 2) + SCR_BORDER_OPACITY,
+        0,
+        SCR_HEIGHT / 2,
         (SCR_WIDTH - SCR_BORDER_OPACITY) / 2,
-        SCR_HEIGHT - SCR_BORDER_OPACITY
+        SCR_HEIGHT / 2
     );
 
     /*---------------------------*/
@@ -716,16 +729,17 @@ void display_handler(void *, void *, void *)
     struct frame_widget time_frame_widget = {
         .parent = lv_scr_act(),
         .text = "Time",
-        .color = font_color,
+        .bg_color = background_color,
+        .font_color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
     };
 
     frame_widget_create(
         &time_frame_widget,
-        (SCR_WIDTH + SCR_BORDER_OPACITY) / 2,
-        (SCR_HEIGHT / 2) + SCR_BORDER_OPACITY,
-        SCR_WIDTH - SCR_BORDER_OPACITY,
-        SCR_HEIGHT - SCR_BORDER_OPACITY
+        SCR_WIDTH / 2,
+        SCR_HEIGHT / 2,
+        SCR_WIDTH / 2,
+        SCR_HEIGHT / 2
     );
 
     /*----------------------*/
