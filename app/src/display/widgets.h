@@ -1,0 +1,84 @@
+#ifndef WIDGETS_H_
+#define WIDGETS_H_
+
+#include "lvgl.h"
+
+struct frame_widget {
+    lv_obj_t *parent;
+    lv_obj_t *self;
+    lv_font_t *font;
+    char *text;
+    lv_point_t line_points[6];
+    lv_style_t style;
+    lv_color_t bg_color;
+    lv_color_t font_color;
+    lv_align_t align;
+};
+
+struct data_widget {
+    lv_obj_t *parent;
+    lv_obj_t *self;
+    lv_font_t *font;
+    char *text;
+    lv_obj_t *data_current_label;
+    lv_obj_t *data_min_label;
+    lv_obj_t *data_max_label;
+    lv_point_t main_line_points[4];
+    lv_point_t left_line_points[3];
+    lv_point_t right_line_points[3];
+    lv_style_t style;
+    lv_color_t color;
+    unsigned int length;
+    lv_align_t align;
+};
+
+struct data_min_widget {
+    lv_obj_t *parent;
+    lv_obj_t *self;
+    lv_font_t *font;
+    char *text;
+    lv_obj_t *data_label;
+    lv_point_t left_line_points[3];
+    lv_point_t right_line_points[3];
+    lv_point_t bottom_line_points[2];
+    lv_style_t style;
+    lv_color_t color;
+    unsigned int length;
+    lv_align_t align;
+};
+
+struct time_and_date_widget {
+    lv_obj_t *parent;
+    lv_obj_t *self;
+    lv_obj_t *time_label;
+    lv_obj_t *date_label;
+    lv_obj_t *day_label;
+    lv_font_t *font;
+    lv_style_t style;
+    lv_color_t color;
+    lv_align_t align;
+};
+
+void frame_widget_create(struct frame_widget *widget,
+                         unsigned int x_start,
+                         unsigned int y_start,
+                         unsigned int x_end,
+                         unsigned int y_end);
+
+void data_widget_create(struct data_widget *widget,
+                        unsigned int x_start,
+                        unsigned int y_start,
+                        unsigned int x_end,
+                        unsigned int y_end);
+
+void data_min_widget_create(struct data_min_widget *widget,
+                            unsigned int x_start,
+                            unsigned int y_start,
+                            unsigned int x_end,
+                            unsigned int y_end);
+
+void time_and_date_widget_create(struct time_and_date_widget *widget,
+                                 unsigned int x_start,
+                                 unsigned int y_start);
+
+#endif
