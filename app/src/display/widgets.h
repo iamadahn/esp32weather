@@ -3,10 +3,17 @@
 
 #include "lvgl.h"
 
+#define SCR_WIDTH 320
+#define SCR_HEIGHT 240
+#define SCR_BORDER_OPACITY 10
+
+#define JETBRAINS_14_WIDTH 8
+#define JETBRAINS_12_WIDTH 7
+
 struct frame_widget {
     lv_obj_t *parent;
     lv_obj_t *self;
-    lv_font_t *font;
+    const lv_font_t *font;
     char *text;
     lv_point_t line_points[6];
     lv_style_t style;
@@ -18,7 +25,8 @@ struct frame_widget {
 struct data_widget {
     lv_obj_t *parent;
     lv_obj_t *self;
-    lv_font_t *font;
+    const lv_font_t *label_font;
+    const lv_font_t *data_font;
     char *text;
     lv_obj_t *data_current_label;
     lv_obj_t *data_min_label;
@@ -35,7 +43,7 @@ struct data_widget {
 struct data_min_widget {
     lv_obj_t *parent;
     lv_obj_t *self;
-    lv_font_t *font;
+    const lv_font_t *font;
     char *text;
     lv_obj_t *data_label;
     lv_point_t left_line_points[3];

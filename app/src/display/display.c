@@ -14,13 +14,6 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/logging/log.h>
 
-#define SCR_WIDTH 320
-#define SCR_HEIGHT 240
-#define SCR_BORDER_OPACITY 10
-
-#define JETBRAINS_14_WIDTH 8
-#define JETBRAINS_12_WIDTH 7
-
 LOG_MODULE_REGISTER(display);
 
 LV_IMG_DECLARE(wife);
@@ -91,6 +84,7 @@ void display_handler(void *, void *, void *)
 
     struct frame_widget outside_frame_widget = {
         .parent = lv_scr_act(),
+        .font = &jetbrains_14,
         .text = "Outside",
         .bg_color = background_color,
         .font_color = font_color,
@@ -115,6 +109,8 @@ void display_handler(void *, void *, void *)
 
     struct data_widget outside_temp_data_widget = {
         .parent = outside_frame_widget.self,
+        .label_font = &jetbrains_12,
+        .data_font = &jetbrains_18,
         .text = "Temp",
         .color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
@@ -138,6 +134,8 @@ void display_handler(void *, void *, void *)
 
     struct data_widget outside_hmdty_data_widget = {
         .parent = outside_frame_widget.self,
+        .label_font = &jetbrains_12,
+        .data_font = &jetbrains_18,
         .text = "Hmd",
         .color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
@@ -161,6 +159,8 @@ void display_handler(void *, void *, void *)
 
     struct data_widget outside_winds_data_widget = {
         .parent = outside_frame_widget.self,
+        .label_font = &jetbrains_12,
+        .data_font = &jetbrains_18,
         .text = "Wind",
         .color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
@@ -184,6 +184,8 @@ void display_handler(void *, void *, void *)
 
     struct data_widget outside_uvi_data_widget = {
         .parent = outside_frame_widget.self,
+        .label_font = &jetbrains_12,
+        .data_font = &jetbrains_18,
         .text = "Uvi",
         .color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
@@ -202,6 +204,7 @@ void display_handler(void *, void *, void *)
     /*---------------------*/
     struct frame_widget inside_frame_widget = {
         .parent = lv_scr_act(),
+        .font = &jetbrains_14,
         .text = "Inside",
         .bg_color = background_color,
         .font_color = font_color,
@@ -221,6 +224,7 @@ void display_handler(void *, void *, void *)
     /*---------------------------*/
     struct data_min_widget inside_temp_widget = {
         .parent = inside_frame_widget.self,
+        .font = &jetbrains_12,
         .text = "Temp",
         .color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
@@ -241,6 +245,7 @@ void display_handler(void *, void *, void *)
     /*------------------------*/
     struct data_min_widget inside_hmdty_widget = {
         .parent = inside_frame_widget.self,
+        .font = &jetbrains_12,
         .text = "Hmd",
         .color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
@@ -261,6 +266,7 @@ void display_handler(void *, void *, void *)
     /*-------------------*/
     struct frame_widget time_frame_widget = {
         .parent = lv_scr_act(),
+        .font = &jetbrains_14,
         .text = "Time",
         .bg_color = background_color,
         .font_color = font_color,
