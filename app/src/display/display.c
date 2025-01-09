@@ -89,6 +89,8 @@ void display_handler(void *, void *, void *)
         .bg_color = background_color,
         .font_color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
+        .event_cb = scr_pressed_cb,
+        .event_code = LV_EVENT_PRESSED,
     };
 
     frame_widget_create(
@@ -208,7 +210,8 @@ void display_handler(void *, void *, void *)
         .text = "Inside",
         .bg_color = background_color,
         .font_color = font_color,
-        .align = LV_ALIGN_TOP_LEFT,
+        .event_cb = scr_pressed_cb,
+        .event_code = LV_EVENT_PRESSED,   .align = LV_ALIGN_TOP_LEFT,
     };
 
     frame_widget_create(
@@ -270,7 +273,8 @@ void display_handler(void *, void *, void *)
         .text = "Time",
         .bg_color = background_color,
         .font_color = font_color,
-        .align = LV_ALIGN_TOP_LEFT,
+        .event_cb = scr_pressed_cb,
+        .event_code = LV_EVENT_PRESSED,   .align = LV_ALIGN_TOP_LEFT,
     };
 
     frame_widget_create(

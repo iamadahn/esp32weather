@@ -20,6 +20,8 @@ struct frame_widget {
     lv_color_t bg_color;
     lv_color_t font_color;
     lv_align_t align;
+    lv_event_cb_t event_cb;
+    lv_event_code_t event_code;
 };
 
 struct data_widget {

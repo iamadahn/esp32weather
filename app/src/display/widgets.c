@@ -58,6 +58,7 @@ void frame_widget_create(struct frame_widget *widget,
     lv_obj_set_style_radius(widget->self, 0, 0);
     lv_obj_set_style_bg_color(widget->self, widget->bg_color, 0);
     lv_obj_clear_flag(widget->self, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_event_cb(widget->self, widget->event_cb, widget->event_code, NULL);
 
     unsigned char label_opacity = 5;
     unsigned char label_pixel_size = strlen(widget->text) * JETBRAINS_14_WIDTH;
