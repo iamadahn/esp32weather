@@ -116,6 +116,8 @@ void display_handler(void *, void *, void *)
         .text = "Temp",
         .color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
+        .event_cb = scr_pressed_cb,
+        .event_code = LV_EVENT_PRESSED,
     };
 
     data_widget_create(
@@ -141,6 +143,8 @@ void display_handler(void *, void *, void *)
         .text = "Hmd",
         .color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
+        .event_cb = scr_pressed_cb,
+        .event_code = LV_EVENT_PRESSED,
     };
 
     data_widget_create(
@@ -166,6 +170,8 @@ void display_handler(void *, void *, void *)
         .text = "Wind",
         .color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
+        .event_cb = scr_pressed_cb,
+        .event_code = LV_EVENT_PRESSED,
     };
 
     data_widget_create(
@@ -191,6 +197,8 @@ void display_handler(void *, void *, void *)
         .text = "Uvi",
         .color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
+        .event_cb = scr_pressed_cb,
+        .event_code = LV_EVENT_PRESSED,
     };
 
     data_widget_create(
@@ -210,8 +218,9 @@ void display_handler(void *, void *, void *)
         .text = "Inside",
         .bg_color = background_color,
         .font_color = font_color,
+        .align = LV_ALIGN_TOP_LEFT,
         .event_cb = scr_pressed_cb,
-        .event_code = LV_EVENT_PRESSED,   .align = LV_ALIGN_TOP_LEFT,
+        .event_code = LV_EVENT_PRESSED,
     };
 
     frame_widget_create(
@@ -231,6 +240,8 @@ void display_handler(void *, void *, void *)
         .text = "Temp",
         .color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
+        .event_cb = scr_pressed_cb,
+        .event_code = LV_EVENT_PRESSED,
     };
 
     data_min_widget_create(
@@ -252,6 +263,8 @@ void display_handler(void *, void *, void *)
         .text = "Hmd",
         .color = font_color,
         .align = LV_ALIGN_TOP_LEFT,
+        .event_cb = scr_pressed_cb,
+        .event_code = LV_EVENT_PRESSED,
     };
 
     data_min_widget_create(
@@ -273,8 +286,9 @@ void display_handler(void *, void *, void *)
         .text = "Time",
         .bg_color = background_color,
         .font_color = font_color,
+        .align = LV_ALIGN_TOP_LEFT,
         .event_cb = scr_pressed_cb,
-        .event_code = LV_EVENT_PRESSED,   .align = LV_ALIGN_TOP_LEFT,
+        .event_code = LV_EVENT_PRESSED,
     };
 
     frame_widget_create(

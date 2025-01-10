@@ -40,6 +40,8 @@ struct data_widget {
     lv_color_t color;
     unsigned int length;
     lv_align_t align;
+    lv_event_cb_t event_cb;
+    lv_event_code_t event_code;
 };
 
 struct data_min_widget {
@@ -55,6 +57,8 @@ struct data_min_widget {
     lv_color_t color;
     unsigned int length;
     lv_align_t align;
+    lv_event_cb_t event_cb;
+    lv_event_code_t event_code;
 };
 
 struct time_and_date_widget {
@@ -67,6 +71,8 @@ struct time_and_date_widget {
     lv_style_t style;
     lv_color_t color;
     lv_align_t align;
+    lv_event_cb_t event_cb;
+    lv_event_code_t event_code;
 };
 
 void frame_widget_create(struct frame_widget *widget,
