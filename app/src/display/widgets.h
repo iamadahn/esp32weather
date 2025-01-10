@@ -3,9 +3,7 @@
 
 #include "lvgl.h"
 
-#define SCR_WIDTH 320
-#define SCR_HEIGHT 240
-#define SCR_BORDER_OPACITY 10
+#define DEFAULT_OUTLINE 10
 
 #define JETBRAINS_14_WIDTH 8
 #define JETBRAINS_12_WIDTH 7

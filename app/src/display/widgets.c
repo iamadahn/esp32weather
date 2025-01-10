@@ -62,7 +62,7 @@ void frame_widget_create(struct frame_widget *widget,
 
     unsigned char label_opacity = 5;
     unsigned char label_pixel_size = strlen(widget->text) * JETBRAINS_14_WIDTH;
-    unsigned int label_x_start = SCR_BORDER_OPACITY + (label_opacity * 2), label_y_start = 5;
+    unsigned int label_x_start = DEFAULT_OUTLINE + (label_opacity * 2), label_y_start = 5;
 
     lv_obj_t *label = label_create(widget->self,
                                    widget->text,
@@ -74,22 +74,22 @@ void frame_widget_create(struct frame_widget *widget,
 
     unsigned short line_x_start = label_x_start - label_opacity,
         line_x_end = label_x_start + label_pixel_size + label_opacity,
-        line_y_start = SCR_BORDER_OPACITY,
-        line_y_end = y_end - SCR_BORDER_OPACITY;
+        line_y_start = DEFAULT_OUTLINE,
+        line_y_end = y_end - DEFAULT_OUTLINE;
 
     widget->line_points[0].x = line_x_start;
     widget->line_points[0].y = line_y_start;
 
-    widget->line_points[1].x = SCR_BORDER_OPACITY;
+    widget->line_points[1].x = DEFAULT_OUTLINE;
     widget->line_points[1].y = line_y_start;
 
-    widget->line_points[2].x = SCR_BORDER_OPACITY;
+    widget->line_points[2].x = DEFAULT_OUTLINE;
     widget->line_points[2].y = line_y_end;
 
-    widget->line_points[3].x = x_end - SCR_BORDER_OPACITY;
+    widget->line_points[3].x = x_end - DEFAULT_OUTLINE;
     widget->line_points[3].y = line_y_end;
 
-    widget->line_points[4].x = x_end - SCR_BORDER_OPACITY;
+    widget->line_points[4].x = x_end - DEFAULT_OUTLINE;
     widget->line_points[4].y = line_y_start;
 
     widget->line_points[5].x = line_x_end;
@@ -223,7 +223,7 @@ void data_widget_create(struct data_widget *widget,
     /*--------------------*/
     char* data_label_text = "test";
     unsigned int data_current_label_x = main_line_x_start + 10,
-                data_current_label_y = text_label_y + (SCR_BORDER_OPACITY * 1.5f) + label_opacity;
+                data_current_label_y = text_label_y + (DEFAULT_OUTLINE * 1.5f) + label_opacity;
 
     widget->data_current_label = label_create(widget->parent,
                                               data_label_text,
@@ -362,7 +362,7 @@ void data_min_widget_create(struct data_min_widget *widget,
     /*------------*/
     char* data_label_text = "0";
     unsigned int data_label_x = x_start,
-                data_label_y = y_end - (SCR_BORDER_OPACITY * 3);
+                data_label_y = y_end - (DEFAULT_OUTLINE * 3);
 
     widget->data_label = label_create(widget->parent,
                                       data_label_text,
@@ -387,7 +387,7 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
                                       &lv_font_montserrat_28,
                                       widget->color,
                                       widget->align,
-                                      x_start + (SCR_BORDER_OPACITY * 3),
+                                      x_start + (DEFAULT_OUTLINE * 3),
                                       y_start);
 
     /*------------*/
@@ -401,7 +401,7 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
                                       widget->color,
                                       widget->align,
                                       x_start,
-                                      y_start + (SCR_BORDER_OPACITY * 2.5f));
+                                      y_start + (DEFAULT_OUTLINE * 2.5f));
 
     /*-----------*/
     /* Day label */
@@ -414,6 +414,6 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
                                      widget->color,
                                      widget->align,
                                      x_start + 5,
-                                     y_start + (SCR_BORDER_OPACITY * 4.5f));
+                                     y_start + (DEFAULT_OUTLINE * 4.5f));
 }
 

@@ -14,6 +14,9 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/logging/log.h>
 
+#define SCR_WIDTH 320
+#define SCR_HEIGHT 240
+
 LOG_MODULE_REGISTER(display);
 
 LV_IMG_DECLARE(wife);
@@ -104,8 +107,8 @@ void display_handler(void *, void *, void *)
     /*---------------------------------*/
     /* Outside temperature data widget */
     /*---------------------------------*/
-    unsigned int outside_temp_data_widget_x_start = SCR_BORDER_OPACITY * 2,
-        outside_temp_data_widget_y_start = SCR_BORDER_OPACITY * 3,
+    unsigned int outside_temp_data_widget_x_start = DEFAULT_OUTLINE * 2,
+        outside_temp_data_widget_y_start = DEFAULT_OUTLINE * 3,
         outside_temp_data_widget_x_end = outside_temp_data_widget_x_start + data_widget_x_length,
         outside_temp_data_widget_y_end = outside_temp_data_widget_y_start + data_widget_y_length;
 
@@ -131,7 +134,7 @@ void display_handler(void *, void *, void *)
     /*------------------------------*/
     /* Outside humidity data widget */
     /*------------------------------*/
-    unsigned int outside_hmdty_data_widget_x_start = outside_temp_data_widget_x_end + SCR_BORDER_OPACITY,
+    unsigned int outside_hmdty_data_widget_x_start = outside_temp_data_widget_x_end + DEFAULT_OUTLINE,
         outside_hmdty_data_widget_y_start = outside_temp_data_widget_y_start,
         outside_hmdty_data_widget_x_end = outside_hmdty_data_widget_x_start + data_widget_x_length,
         outside_hmdty_data_widget_y_end = outside_hmdty_data_widget_y_start + data_widget_y_length;
@@ -158,7 +161,7 @@ void display_handler(void *, void *, void *)
     /*--------------------------------*/
     /* Outside wind speed data widget */
     /*--------------------------------*/
-    unsigned int outside_winds_data_widget_x_start = outside_hmdty_data_widget_x_end + SCR_BORDER_OPACITY + 1,
+    unsigned int outside_winds_data_widget_x_start = outside_hmdty_data_widget_x_end + DEFAULT_OUTLINE + 1,
         outside_winds_data_widget_y_start = outside_hmdty_data_widget_y_start,
         outside_winds_data_widget_x_end = outside_winds_data_widget_x_start + data_widget_x_length,
         outside_winds_data_widget_y_end = outside_winds_data_widget_y_start + data_widget_y_length;
@@ -185,7 +188,7 @@ void display_handler(void *, void *, void *)
     /*---------------------------------------*/
     /* Outside ultraviolet index data widget */
     /*---------------------------------------*/
-    unsigned int outside_uvi_data_widget_x_start = outside_winds_data_widget_x_end + SCR_BORDER_OPACITY,
+    unsigned int outside_uvi_data_widget_x_start = outside_winds_data_widget_x_end + DEFAULT_OUTLINE,
         outside_uvi_data_widget_y_start = outside_winds_data_widget_y_start,
         outside_uvi_data_widget_x_end = outside_uvi_data_widget_x_start + data_widget_x_length,
         outside_uvi_data_widget_y_end = outside_uvi_data_widget_y_start + data_widget_y_length;
@@ -227,7 +230,7 @@ void display_handler(void *, void *, void *)
         &inside_frame_widget,
         0,
         SCR_HEIGHT / 2,
-        (SCR_WIDTH - SCR_BORDER_OPACITY) / 2,
+        (SCR_WIDTH - DEFAULT_OUTLINE) / 2,
         SCR_HEIGHT / 2
     );
 
@@ -246,10 +249,10 @@ void display_handler(void *, void *, void *)
 
     data_min_widget_create(
         &inside_temp_widget,
-        SCR_BORDER_OPACITY * 2,
-        (SCR_HEIGHT / 2) + (SCR_BORDER_OPACITY * 3),
-        (SCR_BORDER_OPACITY * 2) + 55,
-        (SCR_HEIGHT / 2) + (SCR_BORDER_OPACITY * 8)
+        DEFAULT_OUTLINE * 2,
+        (SCR_HEIGHT / 2) + (DEFAULT_OUTLINE * 3),
+        (DEFAULT_OUTLINE * 2) + 55,
+        (SCR_HEIGHT / 2) + (DEFAULT_OUTLINE * 8)
     );
 
     lv_label_set_text(inside_temp_widget.data_label, "30°");
@@ -269,10 +272,10 @@ void display_handler(void *, void *, void *)
 
     data_min_widget_create(
         &inside_hmdty_widget,
-        (SCR_BORDER_OPACITY * 3) + 60,
-        (SCR_HEIGHT / 2) + (SCR_BORDER_OPACITY * 3),
-        (SCR_BORDER_OPACITY * 3) + 112,
-        (SCR_HEIGHT / 2) + (SCR_BORDER_OPACITY * 8)
+        (DEFAULT_OUTLINE * 3) + 60,
+        (SCR_HEIGHT / 2) + (DEFAULT_OUTLINE * 3),
+        (DEFAULT_OUTLINE * 3) + 112,
+        (SCR_HEIGHT / 2) + (DEFAULT_OUTLINE * 8)
     );
 
     lv_label_set_text(inside_hmdty_widget.data_label, "50%");
@@ -310,8 +313,8 @@ void display_handler(void *, void *, void *)
 
     time_and_date_widget_create(
         &time_and_date_widget_instance,
-        (SCR_WIDTH / 2) + (SCR_BORDER_OPACITY * 2),
-        (SCR_HEIGHT / 2) + (SCR_BORDER_OPACITY * 2.5f)
+        (SCR_WIDTH / 2) + (DEFAULT_OUTLINE * 2),
+        (SCR_HEIGHT / 2) + (DEFAULT_OUTLINE * 2.5f)
     );
 
     /*-------------------------------------*/
