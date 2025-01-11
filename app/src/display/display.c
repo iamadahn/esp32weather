@@ -52,9 +52,6 @@ void display_handler(void *, void *, void *)
         return;
 	}
 
-    forecast_scr = lv_obj_create(NULL);
-    lv_scr_load(forecast_scr);
-
     const struct gpio_dt_spec display_backlight = GPIO_DT_SPEC_GET(DT_ALIAS(backlight), gpios);
     gpio_pin_configure_dt(&display_backlight, GPIO_OUTPUT_ACTIVE);
     gpio_pin_set_dt(&display_backlight, true);
@@ -98,10 +95,10 @@ void display_handler(void *, void *, void *)
 
     frame_widget_create(
         &outside_frame_widget,
-        0,
-        0,
         SCR_WIDTH,
-        SCR_HEIGHT / 2
+        SCR_HEIGHT / 2,
+        0,
+        0
     );
 
     /*---------------------------------*/
@@ -228,9 +225,9 @@ void display_handler(void *, void *, void *)
 
     frame_widget_create(
         &inside_frame_widget,
-        0,
+        SCR_WIDTH / 2,
         SCR_HEIGHT / 2,
-        (SCR_WIDTH - DEFAULT_OUTLINE) / 2,
+        0,
         SCR_HEIGHT / 2
     );
 
@@ -249,10 +246,10 @@ void display_handler(void *, void *, void *)
 
     data_min_widget_create(
         &inside_temp_widget,
-        DEFAULT_OUTLINE * 2,
-        (SCR_HEIGHT / 2) + (DEFAULT_OUTLINE * 3),
-        (DEFAULT_OUTLINE * 2) + 55,
-        (SCR_HEIGHT / 2) + (DEFAULT_OUTLINE * 8)
+        0,
+        0,
+        55,
+        DEFAULT_OUTLINE * 5
     );
 
     lv_label_set_text(inside_temp_widget.data_label, "30°");
@@ -272,10 +269,10 @@ void display_handler(void *, void *, void *)
 
     data_min_widget_create(
         &inside_hmdty_widget,
-        (DEFAULT_OUTLINE * 3) + 60,
-        (SCR_HEIGHT / 2) + (DEFAULT_OUTLINE * 3),
-        (DEFAULT_OUTLINE * 3) + 112,
-        (SCR_HEIGHT / 2) + (DEFAULT_OUTLINE * 8)
+        60,
+        0,
+        115,
+        DEFAULT_OUTLINE * 5
     );
 
     lv_label_set_text(inside_hmdty_widget.data_label, "50%");
@@ -293,7 +290,7 @@ void display_handler(void *, void *, void *)
         .event_cb = scr_pressed_cb,
         .event_code = LV_EVENT_PRESSED,
     };
-
+    
     frame_widget_create(
         &time_frame_widget,
         SCR_WIDTH / 2,
@@ -313,8 +310,8 @@ void display_handler(void *, void *, void *)
 
     time_and_date_widget_create(
         &time_and_date_widget_instance,
-        (SCR_WIDTH / 2) + (DEFAULT_OUTLINE * 2),
-        (SCR_HEIGHT / 2) + (DEFAULT_OUTLINE * 2.5f)
+        0,
+        0
     );
 
     /*-------------------------------------*/

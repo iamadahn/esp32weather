@@ -41,15 +41,15 @@ static lv_obj_t* line_create(lv_obj_t *parent,
 }
 
 void frame_widget_create(struct frame_widget *widget,
+                                unsigned int width,
+                                unsigned int height,
                                 unsigned int x_start,
-                                unsigned int y_start,
-                                unsigned int x_end,
-                                unsigned int y_end)
+                                unsigned int y_start)
 {
     widget->self = lv_obj_create(widget->parent);
-    lv_obj_align(widget->self, LV_ALIGN_TOP_LEFT, x_start, y_start);
-    lv_obj_set_width(widget->self, x_end - x_start);
-    lv_obj_set_height(widget->self, y_end - y_start);
+    lv_obj_align(widget->self, widget->align, x_start, y_start);
+    lv_obj_set_width(widget->self, width);
+    lv_obj_set_height(widget->self, height);
     lv_obj_set_style_border_width(widget->self, 0, 0);
     lv_obj_set_style_outline_width(widget->self, 0, 0);
     lv_obj_set_style_outline_pad(widget->self, 0, 0);
@@ -75,7 +75,7 @@ void frame_widget_create(struct frame_widget *widget,
     unsigned short line_x_start = label_x_start - label_opacity,
         line_x_end = label_x_start + label_pixel_size + label_opacity,
         line_y_start = DEFAULT_OUTLINE,
-        line_y_end = y_end - DEFAULT_OUTLINE;
+        line_y_end = height - DEFAULT_OUTLINE;
 
     widget->line_points[0].x = line_x_start;
     widget->line_points[0].y = line_y_start;
@@ -86,10 +86,10 @@ void frame_widget_create(struct frame_widget *widget,
     widget->line_points[2].x = DEFAULT_OUTLINE;
     widget->line_points[2].y = line_y_end;
 
-    widget->line_points[3].x = x_end - DEFAULT_OUTLINE;
+    widget->line_points[3].x = width - DEFAULT_OUTLINE;
     widget->line_points[3].y = line_y_end;
 
-    widget->line_points[4].x = x_end - DEFAULT_OUTLINE;
+    widget->line_points[4].x = width - DEFAULT_OUTLINE;
     widget->line_points[4].y = line_y_start;
 
     widget->line_points[5].x = line_x_end;
