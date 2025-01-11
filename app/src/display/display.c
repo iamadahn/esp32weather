@@ -82,6 +82,11 @@ void display_handler(void *, void *, void *)
     unsigned char data_widget_x_length = 62,
         data_widget_y_length = 25;
 
+    unsigned int big_frame_width = SCR_WIDTH,
+        big_frame_height = SCR_HEIGHT / 2,
+        small_frame_width = SCR_WIDTH / 2,
+        small_frame_height = big_frame_height;
+
     struct frame_widget outside_frame_widget = {
         .parent = lv_scr_act(),
         .font = &jetbrains_14,
@@ -95,8 +100,8 @@ void display_handler(void *, void *, void *)
 
     frame_widget_create(
         &outside_frame_widget,
-        SCR_WIDTH,
-        SCR_HEIGHT / 2,
+        big_frame_width,
+        big_frame_height,
         0,
         0
     );
@@ -225,8 +230,8 @@ void display_handler(void *, void *, void *)
 
     frame_widget_create(
         &inside_frame_widget,
-        SCR_WIDTH / 2,
-        SCR_HEIGHT / 2,
+        small_frame_width,
+        small_frame_height,
         0,
         SCR_HEIGHT / 2
     );
@@ -293,8 +298,8 @@ void display_handler(void *, void *, void *)
     
     frame_widget_create(
         &time_frame_widget,
-        SCR_WIDTH / 2,
-        SCR_HEIGHT / 2,
+        small_frame_width,
+        small_frame_height,
         SCR_WIDTH / 2,
         SCR_HEIGHT / 2
     );
