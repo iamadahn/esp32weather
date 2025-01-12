@@ -79,8 +79,8 @@ void display_handler(void *, void *, void *)
     /*--------------------*/
     /* Frame-realted vars */
     /*--------------------*/
-    unsigned char data_widget_x_length = 62,
-        data_widget_y_length = 25;
+    unsigned int data_widget_width = 62,
+        data_widget_height = 62;
 
     unsigned int big_frame_width = SCR_WIDTH,
         big_frame_height = SCR_HEIGHT / 2,
@@ -110,108 +110,100 @@ void display_handler(void *, void *, void *)
     /* Outside temperature data widget */
     /*---------------------------------*/
     unsigned int outside_temp_data_widget_x_start = DEFAULT_OUTLINE * 2,
-        outside_temp_data_widget_y_start = DEFAULT_OUTLINE * 3,
-        outside_temp_data_widget_x_end = outside_temp_data_widget_x_start + data_widget_x_length,
-        outside_temp_data_widget_y_end = outside_temp_data_widget_y_start + data_widget_y_length;
+        outside_temp_data_widget_y_start = DEFAULT_OUTLINE * 3;
 
     struct data_widget outside_temp_data_widget = {
         .parent = outside_frame_widget.self,
         .label_font = &jetbrains_12,
         .data_font = &jetbrains_18,
         .text = "Temp",
-        .color = font_color,
-        .align = LV_ALIGN_TOP_LEFT,
+        .bg_color = background_color,
+        .font_color = font_color,
         .event_cb = scr_pressed_cb,
         .event_code = LV_EVENT_PRESSED,
     };
 
     data_widget_create(
         &outside_temp_data_widget,
+        data_widget_width,
+        data_widget_height,
         outside_temp_data_widget_x_start,
-        outside_temp_data_widget_y_start,
-        outside_temp_data_widget_x_end,
-        outside_temp_data_widget_y_end
+        outside_temp_data_widget_y_start
     );
 
     /*------------------------------*/
     /* Outside humidity data widget */
     /*------------------------------*/
-    unsigned int outside_hmdty_data_widget_x_start = outside_temp_data_widget_x_end + DEFAULT_OUTLINE,
-        outside_hmdty_data_widget_y_start = outside_temp_data_widget_y_start,
-        outside_hmdty_data_widget_x_end = outside_hmdty_data_widget_x_start + data_widget_x_length,
-        outside_hmdty_data_widget_y_end = outside_hmdty_data_widget_y_start + data_widget_y_length;
+    unsigned int outside_hmdty_data_widget_x_start = outside_temp_data_widget_x_start + data_widget_width + DEFAULT_OUTLINE,
+        outside_hmdty_data_widget_y_start = outside_temp_data_widget_y_start;
 
     struct data_widget outside_hmdty_data_widget = {
         .parent = outside_frame_widget.self,
         .label_font = &jetbrains_12,
         .data_font = &jetbrains_18,
         .text = "Hmd",
-        .color = font_color,
-        .align = LV_ALIGN_TOP_LEFT,
+        .bg_color = background_color,
+        .font_color = font_color,
         .event_cb = scr_pressed_cb,
         .event_code = LV_EVENT_PRESSED,
     };
 
     data_widget_create(
         &outside_hmdty_data_widget,
+        data_widget_width,
+        data_widget_height,
         outside_hmdty_data_widget_x_start,
-        outside_hmdty_data_widget_y_start,
-        outside_hmdty_data_widget_x_end,
-        outside_hmdty_data_widget_y_end
+        outside_hmdty_data_widget_y_start
     );
 
     /*--------------------------------*/
     /* Outside wind speed data widget */
     /*--------------------------------*/
-    unsigned int outside_winds_data_widget_x_start = outside_hmdty_data_widget_x_end + DEFAULT_OUTLINE + 1,
-        outside_winds_data_widget_y_start = outside_hmdty_data_widget_y_start,
-        outside_winds_data_widget_x_end = outside_winds_data_widget_x_start + data_widget_x_length,
-        outside_winds_data_widget_y_end = outside_winds_data_widget_y_start + data_widget_y_length;
+    unsigned int outside_winds_data_widget_x_start = outside_hmdty_data_widget_x_start + data_widget_width + DEFAULT_OUTLINE + 1,
+        outside_winds_data_widget_y_start = outside_hmdty_data_widget_y_start;
 
     struct data_widget outside_winds_data_widget = {
         .parent = outside_frame_widget.self,
         .label_font = &jetbrains_12,
         .data_font = &jetbrains_18,
         .text = "Wind",
-        .color = font_color,
-        .align = LV_ALIGN_TOP_LEFT,
+        .bg_color = background_color,
+        .font_color = font_color,
         .event_cb = scr_pressed_cb,
         .event_code = LV_EVENT_PRESSED,
     };
 
     data_widget_create(
         &outside_winds_data_widget,
+        data_widget_width,
+        data_widget_height,
         outside_winds_data_widget_x_start,
-        outside_winds_data_widget_y_start,
-        outside_winds_data_widget_x_end,
-        outside_winds_data_widget_y_end
+        outside_winds_data_widget_y_start
     );
 
     /*---------------------------------------*/
     /* Outside ultraviolet index data widget */
     /*---------------------------------------*/
-    unsigned int outside_uvi_data_widget_x_start = outside_winds_data_widget_x_end + DEFAULT_OUTLINE,
-        outside_uvi_data_widget_y_start = outside_winds_data_widget_y_start,
-        outside_uvi_data_widget_x_end = outside_uvi_data_widget_x_start + data_widget_x_length,
-        outside_uvi_data_widget_y_end = outside_uvi_data_widget_y_start + data_widget_y_length;
+    unsigned int outside_uvi_data_widget_x_start = outside_winds_data_widget_x_start + data_widget_width + DEFAULT_OUTLINE,
+        outside_uvi_data_widget_y_start = outside_winds_data_widget_y_start;
 
     struct data_widget outside_uvi_data_widget = {
         .parent = outside_frame_widget.self,
         .label_font = &jetbrains_12,
         .data_font = &jetbrains_18,
         .text = "Uvi",
-        .color = font_color,
-        .align = LV_ALIGN_TOP_LEFT,
+        .bg_color = background_color,
+        .font_color = font_color,
         .event_cb = scr_pressed_cb,
         .event_code = LV_EVENT_PRESSED,
     };
 
     data_widget_create(
         &outside_uvi_data_widget,
+        data_widget_width,
+        data_widget_height,
         outside_uvi_data_widget_x_start,
-        outside_uvi_data_widget_y_start,
-        outside_uvi_data_widget_x_end,
-        outside_uvi_data_widget_y_end
+        outside_uvi_data_widget_y_start
     );
 
     /*---------------------*/

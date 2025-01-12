@@ -110,25 +110,39 @@ void frame_widget_create(struct frame_widget *widget,
 } 
 
 void data_widget_create(struct data_widget *widget,
+                               unsigned int width,
+                               unsigned int height,
                                unsigned int x_start,
-                               unsigned int y_start,
-                               unsigned int x_end,
-                               unsigned int y_end)
+                               unsigned int y_start)
 {
+    widget->self = lv_obj_create(widget->parent);
+    widget->width = width;
+    widget->height = height;
+    lv_obj_align(widget->self, LV_ALIGN_TOP_LEFT, x_start, y_start);
+    lv_obj_set_width(widget->self, widget->width);
+    lv_obj_set_height(widget->self, widget->height);
+    lv_obj_set_style_border_width(widget->self, 0, 0);
+    lv_obj_set_style_outline_width(widget->self, 0, 0);
+    lv_obj_set_style_outline_pad(widget->self, 0, 0);
+    lv_obj_set_style_pad_top(widget->self, 0, 0);
+    lv_obj_set_style_pad_left(widget->self, 0, 0);
+    lv_obj_set_style_radius(widget->self, 0, 0);
+    lv_obj_set_style_bg_color(widget->self, widget->bg_color, 0);
+    lv_obj_clear_flag(widget->self, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_event_cb(widget->self, widget->event_cb, widget->event_code, NULL);
+
     /*-----------*/
     /* Main line */
     /*-----------*/
-    unsigned char main_line_x_length = x_end - x_start,
-        main_line_y_length = y_end - y_start;
+    unsigned char main_line_x_length = widget->width,
+        main_line_y_length = widget->height;
 
-    widget->width = main_line_x_length;
+    unsigned int main_line_x_start = 0,
+        main_line_x_end = main_line_x_length,
+        main_line_x_center = main_line_x_length / 2,
 
-    unsigned int main_line_x_start = x_start,
-        main_line_x_end = main_line_x_start + main_line_x_length,
-        main_line_x_center = main_line_x_end - (main_line_x_length / 2),
-
-        main_line_y_start = y_start + 35,
-        main_line_y_end = main_line_y_start + main_line_y_length;
+        main_line_y_start = (main_line_y_length / 2) + (DEFAULT_OUTLINE / 2),
+        main_line_y_end = main_line_y_length;
 
     widget->main_line_points[0].x = main_line_x_start;
     widget->main_line_points[0].y = main_line_y_start;
@@ -143,12 +157,13 @@ void data_widget_create(struct data_widget *widget,
     widget->main_line_points[3].y = main_line_y_end;
 
     lv_style_init(&widget->style);
-    lv_obj_t *main_line = line_create(widget->parent,
+    lv_obj_t *main_line = line_create(widget->self,
                                       widget->main_line_points,
-                                      &widget->style, widget->color,
+                                      &widget->style,
+                                      widget->font_color,
                                       1,
                                       4,
-                                      widget->align,
+                                      LV_ALIGN_TOP_LEFT,
                                       0,
                                       0);
 
@@ -160,13 +175,13 @@ void data_widget_create(struct data_widget *widget,
     unsigned char label_opacity = 2;
 
     unsigned int text_label_x = main_line_x_start + label_space_length + label_opacity,
-        text_label_y = y_start;
+        text_label_y = 0;
 
-    lv_obj_t *text_label = label_create(widget->parent,
+    lv_obj_t *text_label = label_create(widget->self,
                                         widget->text,
                                         widget->label_font,
-                                        widget->color,
-                                        widget->align,
+                                        widget->font_color,
+                                        LV_ALIGN_TOP_LEFT,
                                         text_label_x,
                                         text_label_y);
 
@@ -185,13 +200,13 @@ void data_widget_create(struct data_widget *widget,
     widget->left_line_points[2].x = main_line_x_start;
     widget->left_line_points[2].y = left_line_y_start + label_space_length;
 
-    lv_obj_t *left_out_line = line_create(widget->parent,
+    lv_obj_t *left_out_line = line_create(widget->self,
                                           widget->left_line_points,
                                           &widget->style,
-                                          widget->color,
+                                          widget->font_color,
                                           1,
                                           3,
-                                          widget->align,
+                                          LV_ALIGN_TOP_LEFT,
                                           0,
                                           0);
 
@@ -204,19 +219,19 @@ void data_widget_create(struct data_widget *widget,
     widget->right_line_points[0].x = right_line_x_start;
     widget->right_line_points[0].y = right_line_y_start;
 
-    widget->right_line_points[1].x = main_line_x_end;
+    widget->right_line_points[1].x = main_line_x_end - 1;
     widget->right_line_points[1].y = right_line_y_start;
 
-    widget->right_line_points[2].x = main_line_x_end;
+    widget->right_line_points[2].x = main_line_x_end - 1;
     widget->right_line_points[2].y = right_line_y_start + label_space_length;
 
-    lv_obj_t *right_out_line = line_create(widget->parent,
+    lv_obj_t *right_out_line = line_create(widget->self,
                                            widget->right_line_points,
                                            &widget->style,
-                                           widget->color,
+                                           widget->font_color,
                                            1,
                                            3,
-                                           widget->align,
+                                           LV_ALIGN_TOP_LEFT,
                                            0,
                                            0);
 
@@ -224,44 +239,35 @@ void data_widget_create(struct data_widget *widget,
     /* Current data label */
     /*--------------------*/
     char* data_label_text = "test";
-    unsigned int data_current_label_x = main_line_x_start + 10,
-                data_current_label_y = text_label_y + (DEFAULT_OUTLINE * 1.5f) + label_opacity;
-
-    widget->data_current_label = label_create(widget->parent,
+    widget->data_current_label = label_create(widget->self,
                                               data_label_text,
                                               widget->data_font,
-                                              widget->color,
-                                              widget->align,
-                                              data_current_label_x,
-                                              data_current_label_y);
+                                              widget->font_color,
+                                              LV_ALIGN_CENTER,
+                                              5,
+                                              0);
 
     /*----------------*/
     /* Min data label */
     /*----------------*/
-    unsigned int data_min_label_x = main_line_x_start + 5,
-                data_min_label_y = main_line_y_start + 7;
-
-    widget->data_min_label = label_create(widget->parent,
+    widget->data_min_label = label_create(widget->self,
                                           data_label_text,
                                           widget->label_font,
-                                          widget->color,
-                                          widget->align,
-                                          data_min_label_x,
-                                          data_min_label_y);
+                                          widget->font_color,
+                                          LV_ALIGN_CENTER,
+                                          -10,
+                                          25);
 
     /*----------------*/
     /* Max data label */
     /*----------------*/
-    unsigned int data_max_label_x = main_line_x_center + label_opacity,
-                data_max_label_y = main_line_y_start + 7;
-
-    widget->data_max_label = label_create(widget->parent,
+    widget->data_max_label = label_create(widget->self,
                                           data_label_text,
                                           widget->label_font,
-                                          widget->color,
-                                          widget->align,
-                                          data_max_label_x,
-                                          data_max_label_y);
+                                          widget->font_color,
+                                          LV_ALIGN_CENTER,
+                                          23,
+                                          25);
 }
 
 void data_min_widget_create(struct data_min_widget *widget,

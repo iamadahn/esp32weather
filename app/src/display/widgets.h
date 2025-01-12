@@ -37,10 +37,10 @@ struct data_widget {
     lv_point_t left_line_points[3];
     lv_point_t right_line_points[3];
     lv_style_t style;
-    lv_color_t color;
+    lv_color_t bg_color;
+    lv_color_t font_color;
     unsigned int width;
     unsigned int height;
-    lv_align_t align;
     lv_event_cb_t event_cb;
     lv_event_code_t event_code;
 };
