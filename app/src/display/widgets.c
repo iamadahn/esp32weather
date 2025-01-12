@@ -47,9 +47,11 @@ void frame_widget_create(struct frame_widget *widget,
                                 unsigned int y_start)
 {
     widget->self = lv_obj_create(widget->parent);
+    widget->width = width;
+    widget->height = height;
     lv_obj_align(widget->self, widget->align, x_start, y_start);
-    lv_obj_set_width(widget->self, width);
-    lv_obj_set_height(widget->self, height);
+    lv_obj_set_width(widget->self, widget->width);
+    lv_obj_set_height(widget->self, widget->height);
     lv_obj_set_style_border_width(widget->self, 0, 0);
     lv_obj_set_style_outline_width(widget->self, 0, 0);
     lv_obj_set_style_outline_pad(widget->self, 0, 0);
@@ -119,7 +121,7 @@ void data_widget_create(struct data_widget *widget,
     unsigned char main_line_x_length = x_end - x_start,
         main_line_y_length = y_end - y_start;
 
-    widget->length = main_line_x_length;
+    widget->width = main_line_x_length;
 
     unsigned int main_line_x_start = x_start,
         main_line_x_end = main_line_x_start + main_line_x_length,
