@@ -48,17 +48,18 @@ struct data_widget {
 struct data_min_widget {
     lv_obj_t *parent;
     lv_obj_t *self;
-    const lv_font_t *font;
+    const lv_font_t *label_font;
+    const lv_font_t *data_font;
     char *text;
     lv_obj_t *data_label;
     lv_point_t left_line_points[3];
     lv_point_t right_line_points[3];
     lv_point_t bottom_line_points[2];
     lv_style_t style;
-    lv_color_t color;
+    lv_color_t bg_color;
+    lv_color_t font_color;
     unsigned int width;
     unsigned int height;
-    lv_align_t align;
     lv_event_cb_t event_cb;
     lv_event_code_t event_code;
 };

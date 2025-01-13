@@ -233,43 +233,45 @@ void display_handler(void *, void *, void *)
     /*---------------------------*/
     struct data_min_widget inside_temp_widget = {
         .parent = inside_frame_widget.self,
-        .font = &jetbrains_12,
+        .label_font = &jetbrains_12,
+        .data_font = &lv_font_montserrat_28,
         .text = "Temp",
-        .color = font_color,
-        .align = LV_ALIGN_TOP_LEFT,
+        .bg_color = background_color,
+        .font_color = font_color,
         .event_cb = scr_pressed_cb,
         .event_code = LV_EVENT_PRESSED,
     };
 
     data_min_widget_create(
         &inside_temp_widget,
-        0,
-        0,
-        55,
-        DEFAULT_OUTLINE * 5
+        50,
+        50,
+        20,
+        30
     );
 
-    lv_label_set_text(inside_temp_widget.data_label, "30°");
+    lv_label_set_text(inside_temp_widget.data_label, "99°");
 
     /*------------------------*/
     /* Inside humidity widget */
     /*------------------------*/
     struct data_min_widget inside_hmdty_widget = {
         .parent = inside_frame_widget.self,
-        .font = &jetbrains_12,
+        .label_font = &jetbrains_12,
+        .data_font = &lv_font_montserrat_28,
         .text = "Hmd",
-        .color = font_color,
-        .align = LV_ALIGN_TOP_LEFT,
+        .bg_color = background_color,
+        .font_color = font_color,
         .event_cb = scr_pressed_cb,
         .event_code = LV_EVENT_PRESSED,
     };
 
     data_min_widget_create(
         &inside_hmdty_widget,
-        60,
-        0,
-        115,
-        DEFAULT_OUTLINE * 5
+        50,
+        50,
+        90,
+        30
     );
 
     lv_label_set_text(inside_hmdty_widget.data_label, "50%");
