@@ -69,13 +69,15 @@ struct time_and_date_widget {
     lv_obj_t *self;
     lv_obj_t *time_label;
     lv_obj_t *date_label;
-    lv_obj_t *day_label;
-    lv_font_t *font;
+    lv_obj_t *day_of_week_label;
+    const lv_font_t *time_font;
+    const lv_font_t *date_font;
+    const lv_font_t *day_of_week_font;
     lv_style_t style;
-    lv_color_t color;
+    lv_color_t bg_color;
+    lv_color_t font_color;
     unsigned int width;
     unsigned int height;
-    lv_align_t align;
     lv_event_cb_t event_cb;
     lv_event_code_t event_code;
 };
@@ -99,6 +101,8 @@ void data_min_widget_create(struct data_min_widget *widget,
                             unsigned int y_end);
 
 void time_and_date_widget_create(struct time_and_date_widget *widget,
+                                 unsigned int width,
+                                 unsigned int height,
                                  unsigned int x_start,
                                  unsigned int y_start);
 

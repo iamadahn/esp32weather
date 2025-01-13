@@ -432,22 +432,40 @@ void data_min_widget_create(struct data_min_widget *widget,
 }
 
 void time_and_date_widget_create(struct time_and_date_widget *widget,
+                                        unsigned int width,
+                                        unsigned int height,
                                         unsigned int x_start,
                                         unsigned int y_start)
 {
+    widget->self = lv_obj_create(widget->parent);
+    widget->width = width;
+    widget->height = height;
+    lv_obj_align(widget->self, LV_ALIGN_TOP_LEFT, x_start, y_start);
+    lv_obj_set_width(widget->self, widget->width);
+    lv_obj_set_height(widget->self, widget->height);
+    lv_obj_set_style_border_width(widget->self, 0, 0);
+    lv_obj_set_style_outline_width(widget->self, 0, 0);
+    lv_obj_set_style_outline_pad(widget->self, 0, 0);
+    lv_obj_set_style_pad_top(widget->self, 0, 0);
+    lv_obj_set_style_pad_left(widget->self, 0, 0);
+    lv_obj_set_style_radius(widget->self, 0, 0);
+    lv_obj_set_style_bg_color(widget->self, widget->bg_color, 0);
+    lv_obj_clear_flag(widget->self, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_event_cb(widget->self, widget->event_cb, widget->event_code, NULL);
+
     /*------------*/
     /* Time label */
     /*------------*/
     char* time_label_text = "13:37";
 
     widget->time_label = label_create(
-        widget->parent,
+        widget->self,
         time_label_text,
-        &lv_font_montserrat_28,
-        widget->color,
-        widget->align,
-        x_start + (DEFAULT_OUTLINE * 3),
-        y_start
+        widget->time_font,
+        widget->font_color,
+        LV_ALIGN_TOP_MID,
+        0,
+        0
     );
 
     /*------------*/
@@ -456,13 +474,13 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
     char* date_label_text = "28.06.2021";
 
     widget->date_label = label_create(
-        widget->parent,
+        widget->self,
         date_label_text,
-        &lv_font_montserrat_24,
-        widget->color,
-        widget->align,
-        x_start,
-        y_start + (DEFAULT_OUTLINE * 2.5f)
+        widget->date_font,
+        widget->font_color,
+        LV_ALIGN_TOP_MID,
+        0,
+        30
     );
 
     /*-----------*/
@@ -470,14 +488,14 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
     /*-----------*/
     char* day_label_text = "Saturday";
 
-    widget->day_label = label_create(
-        widget->parent,
+    widget->day_of_week_label = label_create(
+        widget->self,
         day_label_text,
-        &lv_font_montserrat_24,
-        widget->color,
-        widget->align,
-        x_start + 5,
-        y_start + (DEFAULT_OUTLINE * 4.5f)
+        widget->day_of_week_font,
+        widget->font_color,
+        LV_ALIGN_TOP_MID,
+        0,
+        55
     );
 }
 

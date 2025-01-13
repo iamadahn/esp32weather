@@ -303,14 +303,19 @@ void display_handler(void *, void *, void *)
     /*----------------------*/
     struct time_and_date_widget time_and_date_widget_instance = {
         .parent = time_frame_widget.self,
-        .color = font_color,
-        .align = LV_ALIGN_TOP_LEFT,
+        .bg_color = background_color,
+        .font_color = font_color,
+        .time_font = &lv_font_montserrat_28,
+        .date_font = &lv_font_montserrat_24,
+        .day_of_week_font = &lv_font_montserrat_24,
     };
 
     time_and_date_widget_create(
         &time_and_date_widget_instance,
-        0,
-        0
+        125,
+        85,
+        20,
+        20
     );
 
     /*-------------------------------------*/
