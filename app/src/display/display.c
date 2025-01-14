@@ -24,6 +24,8 @@ LV_IMG_DECLARE(wife);
 LV_FONT_DECLARE(jetbrains_12);
 LV_FONT_DECLARE(jetbrains_14);
 LV_FONT_DECLARE(jetbrains_18);
+LV_FONT_DECLARE(jetbrains_20);
+LV_FONT_DECLARE(jetbrains_28);
 
 static unsigned char scr_pressed = 0;
 
@@ -234,7 +236,7 @@ void display_handler(void *, void *, void *)
     struct data_min_widget inside_temp_widget = {
         .parent = inside_frame_widget.self,
         .label_font = &jetbrains_12,
-        .data_font = &lv_font_montserrat_28,
+        .data_font = &jetbrains_28,
         .text = "Temp",
         .bg_color = background_color,
         .font_color = font_color,
@@ -244,9 +246,9 @@ void display_handler(void *, void *, void *)
 
     data_min_widget_create(
         &inside_temp_widget,
+        60,
         50,
-        50,
-        20,
+        15,
         30
     );
 
@@ -258,7 +260,7 @@ void display_handler(void *, void *, void *)
     struct data_min_widget inside_hmdty_widget = {
         .parent = inside_frame_widget.self,
         .label_font = &jetbrains_12,
-        .data_font = &lv_font_montserrat_28,
+        .data_font = &jetbrains_28,
         .text = "Hmd",
         .bg_color = background_color,
         .font_color = font_color,
@@ -268,9 +270,9 @@ void display_handler(void *, void *, void *)
 
     data_min_widget_create(
         &inside_hmdty_widget,
+        60,
         50,
-        50,
-        90,
+        85,
         30
     );
 
@@ -305,9 +307,9 @@ void display_handler(void *, void *, void *)
         .parent = time_frame_widget.self,
         .bg_color = background_color,
         .font_color = font_color,
-        .time_font = &lv_font_montserrat_28,
-        .date_font = &lv_font_montserrat_24,
-        .day_of_week_font = &lv_font_montserrat_24,
+        .time_font = &jetbrains_28,
+        .date_font = &jetbrains_20,
+        .day_of_week_font = &jetbrains_20,
     };
 
     time_and_date_widget_create(

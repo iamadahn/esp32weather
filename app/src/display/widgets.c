@@ -464,8 +464,8 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
         widget->time_font,
         widget->font_color,
         LV_ALIGN_TOP_MID,
-        0,
-        0
+        5,
+        5
     );
 
     /*------------*/
@@ -479,8 +479,8 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
         widget->date_font,
         widget->font_color,
         LV_ALIGN_TOP_MID,
-        0,
-        30
+        5,
+        35
     );
 
     /*-----------*/
@@ -494,8 +494,8 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
         widget->day_of_week_font,
         widget->font_color,
         LV_ALIGN_TOP_MID,
-        0,
-        55
+        5,
+        60
     );
 }
 
