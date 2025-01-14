@@ -7,6 +7,8 @@ set(SCRS
     ${CMAKE_CURRENT_LIST_DIR}/fonts/jetbrains_12.c
     ${CMAKE_CURRENT_LIST_DIR}/fonts/jetbrains_14.c
     ${CMAKE_CURRENT_LIST_DIR}/fonts/jetbrains_18.c
+    ${CMAKE_CURRENT_LIST_DIR}/fonts/jetbrains_20.c
+    ${CMAKE_CURRENT_LIST_DIR}/fonts/jetbrains_28.c
 )
 
 add_library(display INTERFACE)
