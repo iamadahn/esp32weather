@@ -310,6 +310,8 @@ void display_handler(void *, void *, void *)
         .time_font = &jetbrains_28,
         .date_font = &jetbrains_20,
         .day_of_week_font = &jetbrains_20,
+        .event_cb = scr_pressed_cb,
+        .event_code = LV_EVENT_PRESSED,
     };
 
     time_and_date_widget_create(
