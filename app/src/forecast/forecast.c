@@ -1,5 +1,6 @@
 #include "forecast.h"
 #include "forecast_json.h"
+#include "user_data.h"
 #include "wifi.h"
 
 #include <zephyr/kernel.h>
@@ -10,12 +11,6 @@
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/tls_credentials.h>
 #include <zephyr/net/http/client.h>
-
-#define WIFI_USER_SSID  "your_ssid"
-#define WIFI_USER_PSK   "your_psk"
-
-#define FORECAST_SERVER  "api.open-meteo.com"
-#define FORECAST_APICALL "your_apicall"
 
 LOG_MODULE_REGISTER(forecast);
 
@@ -75,6 +70,13 @@ static void response_cb(struct http_response *response, enum http_final_call fin
     printk(response->recv_buf);
     k_msleep(1000);
     forecast_response_parse(strchr(response->recv_buf, '{'));
+    
+    unsigned char forecast_async_state = 1;
+    k_msgq_purge(&forecast_async_state_msgq);
+    int ret = k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT);
+    if (ret != 0) {
+        LOG_ERR("Failed to push to wifi state queue");
+    }
 }
 
 static int forecast_get(const char *server, const char *api_key)
@@ -161,12 +163,6 @@ void forecast_handler(void *, void *, void *) {
    
     forecast_get(FORECAST_SERVER, FORECAST_APICALL);
  
-    forecast_async_state = 1;
-    k_msgq_purge(&forecast_async_state_msgq);
-    ret = k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT);
-    if (ret != 0) {
-        LOG_ERR("Failed to push to wifi state queue");
-    }
 
     while (true) {
         k_msleep(100);
