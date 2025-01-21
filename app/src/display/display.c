@@ -362,6 +362,14 @@ void display_handler(void *, void *, void *)
             LOG_ERR("Failed to get outside humidity data from the queue: %d", ret);
         }
         //sprintf(hmdty_outside_data_str, "%lu", humidity_outside);
+        if (scr_pressed == 1) {
+            scr_pressed = 0;
+            if (lv_scr_act() == forecast_scr) {
+                lv_scr_load(wife_scr);
+            } else {
+                lv_scr_load(forecast_scr);
+            }
+        }            
 
         lv_task_handler();
         k_sleep(K_MSEC(100));
