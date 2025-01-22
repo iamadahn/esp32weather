@@ -1,6 +1,7 @@
 #include "forecast.h"
 #include "user_data.h"
 #include "wifi.h"
+#include "cjson/cJSON.h"
 
 #include <zephyr/kernel.h>
 #include <zephyr/net/socket.h>
@@ -28,6 +29,38 @@ static int socket_setup(const char* server, const char* port, int *sock);
 
 static int forecast_response_parse(char *response)
 {
+    cJSON_Hooks hooks = {
+        .malloc_fn = malloc,
+        .free_fn = free,
+    };
+
+    cJSON_InitHooks(&hooks);
+
+    cJSON *json = cJSON_Parse(response);
+    if (json == NULL) {
+        LOG_ERR("Error parsing JSON");
+        return -1;
+    }
+
+    cJSON *timezone = cJSON_GetObjectItemCaseSensitive(json, "timezone");
+    if (cJSON_IsString(timezone) && (timezone->valuestring != NULL)) {
+        LOG_INF("Timezone: %s", timezone->valuestring);
+    }
+
+    cJSON *latitude = cJSON_GetObjectItemCaseSensitive(json, "latitude");
+    if (cJSON_IsNumber(latitude)) {
+        LOG_INF("Latitude: %f", latitude->valuedouble);
+    }
+
+    cJSON *daily = cJSON_GetObjectItemCaseSensitive(json, "daily");
+
+    cJSON *temperature_2m_max = cJSON_GetObjectItemCaseSensitive(daily, "temperature_2m_max");
+    if (cJSON_IsArray(temperature_2m_max)) {
+        LOG_INF("Temperature 2m max - %f", cJSON_GetArrayItem(temperature_2m_max, 0)->valuedouble);
+    }
+
+    cJSON_Delete(json);
+
     /*
     while (k_msgq_put(&temperature_outside_msgq, &forecast.current.temperature_2m, K_NO_WAIT) != 0) {
         k_msgq_purge(&temperature_outside_msgq);
@@ -51,8 +84,6 @@ static void response_cb(struct http_response *response, enum http_final_call fin
 
     LOG_INF("GET response status - %s.", response->http_status);
 
-    printk(response->recv_buf);
-    k_msleep(1000);
     forecast_response_parse(strchr(response->recv_buf, '{'));
     
     unsigned char forecast_async_state = 1;

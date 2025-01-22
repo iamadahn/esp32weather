@@ -2,3 +2,6 @@
 	path = zephyr
 	url = https://github.com/iamadahn/zephyr
 	branch = v3.7-branch
+[submodule "app/src/forecast/cjson"]
+	path = app/src/forecast/cjson
+	url = https://github.com/DaveGamble/cJSON
