@@ -16,9 +16,8 @@
 
 LOG_MODULE_REGISTER(forecast);
 
-K_MSGQ_DEFINE(temperature_outside_msgq, sizeof(float), 1, 1);
-K_MSGQ_DEFINE(humidity_outside_msgq, sizeof(unsigned long), 1, 1);
 K_MSGQ_DEFINE(forecast_async_state_msgq, sizeof(unsigned short), 1, 1);
+K_MSGQ_DEFINE(forecast_data_msgq, sizeof(struct forecast), 1, 1);
 
 unsigned char recv_buf[3072];
 
@@ -162,6 +161,10 @@ static int forecast_response_parse(char *response)
     forecast_array_get_current(wind_speed_array, &forecast.wind_speed, 0);
     forecast_array_get_current(uvi_array, &forecast.uvi, 0);
     /*------------------------------------------------------------*/
+
+    while (k_msgq_put(&forecast_data_msgq, &forecast, K_NO_WAIT) != 0) {
+        k_msgq_purge(&forecast_data_msgq);
+    }
 
     cJSON_Delete(json);
 

@@ -1,5 +1,6 @@
 #include "display.h"
 #include "widgets.h"
+#include "forecast/forecast.h"
 
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
@@ -31,10 +32,8 @@ static unsigned char scr_pressed = 0;
 
 extern struct k_msgq temperature_inside_msgq,
     humidity_inside_msgq,
-    temperature_outside_msgq,
     forecast_async_state_msgq,
-    humidity_outside_msgq;
-
+    forecast_data_msgq;
 
 static lv_obj_t *forecast_scr, *wife_scr;
 
@@ -337,9 +336,8 @@ void display_handler(void *, void *, void *)
     }
 
     while (1) {
-        float temperature_outside;
-        unsigned long humidity_outside;
-        struct sensor_value temperature_inside, humidity_inside;
+        static struct sensor_value temperature_inside, humidity_inside;
+        static struct forecast forecast;
 
         int ret = k_msgq_peek(&temperature_inside_msgq, &temperature_inside);
         if (ret != 0) {
@@ -353,17 +351,12 @@ void display_handler(void *, void *, void *)
         }
         //sprintf(hmdty_inside_data_str, "%.1f", sensor_value_to_double(&humidity_inside));
 
-        ret = k_msgq_peek(&temperature_outside_msgq, &temperature_outside);
+        ret = k_msgq_peek(&forecast_data_msgq, &forecast);
         if (ret != 0) {
-            LOG_ERR("Failed to get outside temperature data from the queue: %d", ret);
-        }
-        //sprintf(temp_outside_data_str, "%.1f", (double)temperature_outside);
-
-        ret = k_msgq_peek(&humidity_outside_msgq, &humidity_outside);
-        if (ret != 0) {
-            LOG_ERR("Failed to get outside humidity data from the queue: %d", ret);
+            LOG_ERR("Failed to get forecast data from the queue: %d", ret);
         }
         //sprintf(hmdty_outside_data_str, "%lu", humidity_outside);
+
         if (scr_pressed == 1) {
             scr_pressed = 0;
             if (lv_scr_act() == forecast_scr) {
