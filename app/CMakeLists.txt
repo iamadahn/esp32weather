@@ -9,6 +9,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 target_sources(app PRIVATE src/main.c)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/forecast)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/display)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/ths)
