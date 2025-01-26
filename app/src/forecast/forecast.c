@@ -9,15 +9,22 @@
 #include <zephyr/net/socket.h>
 #include <zephyr/data/json.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/sys/timeutil.h>
+#include <zephyr/posix/time.h>
 
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/tls_credentials.h>
 #include <zephyr/net/http/client.h>
+#include <zephyr/net/sntp.h>
+
+#include <zephyr/drivers/rtc.h>
 
 LOG_MODULE_REGISTER(forecast);
 
 K_MSGQ_DEFINE(forecast_async_state_msgq, sizeof(unsigned short), 1, 1);
 K_MSGQ_DEFINE(forecast_data_msgq, sizeof(struct forecast), 1, 1);
+
+const struct device *const rtc = DEVICE_DT_GET(DT_ALIAS(rtc));
 
 unsigned char recv_buf[3072];
 
@@ -29,6 +36,7 @@ static void response_cb(struct http_response *response,
 static int forecast_response_parse(char *response);
 static int forecast_array_get_min_max(cJSON *array, struct forecast_data *data);
 static int forecast_array_get_current(cJSON *array, struct forecast_data *data, unsigned int current_hour);
+static int sntp_sync_time(void);
 
 static int socket_setup(const char* server, const char* port, int *sock)
 {
@@ -203,6 +211,45 @@ static int forecast_array_get_current(cJSON *array, struct forecast_data *data, 
     data->current = cJSON_GetArrayItem(array, current_hour)->valuedouble;
 
     return 0;
+}
+
+
+static int sntp_sync_time(void) {
+    int rc;
+	struct sntp_time now;
+	struct timespec tspec;
+
+	rc = sntp_simple(SNTP_SERVER, SYS_FOREVER_MS, &now);
+	if (rc == 0) {
+		tspec.tv_sec = now.seconds;
+		tspec.tv_nsec = ((uint64_t)now.fraction * (1000lu * 1000lu * 1000lu)) >> 32;
+
+		clock_settime(CLOCK_REALTIME, &tspec);
+
+		LOG_DBG("Acquired time from NTP server: %u", (uint32_t)tspec.tv_sec);
+	} else {
+		LOG_ERR("Failed to acquire SNTP, code %d\n", rc);
+	}
+
+    struct rtc_time rtc_time;
+    struct tm *real_time;
+
+    real_time = gmtime(&tspec.tv_sec);
+
+    rtc_time.tm_sec = real_time->tm_sec;
+    rtc_time.tm_min = real_time->tm_min;
+    rtc_time.tm_hour = real_time->tm_hour;
+    rtc_time.tm_mday = real_time->tm_mday;
+    rtc_time.tm_mon = real_time->tm_mon;
+    rtc_time.tm_year = real_time->tm_year;
+    rtc_time.tm_wday = real_time->tm_wday;
+    rtc_time.tm_yday = real_time->tm_yday;
+    rtc_time.tm_isdst = real_time->tm_isdst;
+
+    //rtc_set_time(rtc, (struct rtc_time*)&real_time);
+    rtc_set_time(rtc, &rtc_time);
+
+    return rc;
 }
 
 void forecast_handler(void *, void *, void *) {

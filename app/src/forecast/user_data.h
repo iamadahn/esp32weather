@@ -3,3 +3,5 @@
 
 #define FORECAST_SERVER  "api.open-meteo.com"
 #define FORECAST_APICALL "your_apicall"
+
+#define SNTP_SERVER "0.pool.ntp.org"
