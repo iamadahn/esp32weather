@@ -37,10 +37,41 @@ extern struct k_msgq temperature_inside_msgq,
 
 static lv_obj_t *forecast_scr, *wife_scr;
 
+static void scr_pressed_cb(lv_event_t *event);
+static void data_widget_update(struct data_widget *widget, struct forecast_data data);
+static void data_min_widget_update(struct data_min_widget *widget, double value);
+
 static void scr_pressed_cb(lv_event_t *event)
 {
     scr_pressed = 1;
     printf("Clicked on screen!\n");
+}
+
+static void data_widget_update(struct data_widget *widget, struct forecast_data data)
+{
+    if (widget == NULL)
+        return;
+
+    char buf[32];
+    sprintf(buf, "%.1f", data.current);
+    lv_label_set_text(widget->data_current_label, buf);
+
+    sprintf(buf, "%.1f", data.max);
+    lv_label_set_text(widget->data_max_label, buf);
+
+    sprintf(buf, "%.1f", data.min);
+    lv_label_set_text(widget->data_min_label, buf);
+}
+
+static void data_min_widget_update(struct data_min_widget *widget, double value)
+{
+    if (widget == NULL)
+      return; 
+
+    char buf[32];
+
+    sprintf(buf, "%.1f", value);
+    lv_label_set_text(widget->data_label, buf);
 }
 
 void display_handler(void *, void *, void *)
@@ -232,7 +263,7 @@ void display_handler(void *, void *, void *)
     /*---------------------------*/
     /* Inside temperature widget */
     /*---------------------------*/
-    struct data_min_widget inside_temp_widget = {
+    struct data_min_widget inside_temp_data_widget = {
         .parent = inside_frame_widget.self,
         .label_font = &jetbrains_12,
         .data_font = &jetbrains_28,
@@ -244,19 +275,19 @@ void display_handler(void *, void *, void *)
     };
 
     data_min_widget_create(
-        &inside_temp_widget,
+        &inside_temp_data_widget,
         60,
         50,
         15,
         30
     );
 
-    lv_label_set_text(inside_temp_widget.data_label, "99°");
+    lv_label_set_text(inside_temp_data_widget.data_label, "99°");
 
     /*------------------------*/
     /* Inside humidity widget */
     /*------------------------*/
-    struct data_min_widget inside_hmdty_widget = {
+    struct data_min_widget inside_hmdty_data_widget = {
         .parent = inside_frame_widget.self,
         .label_font = &jetbrains_12,
         .data_font = &jetbrains_28,
@@ -268,14 +299,14 @@ void display_handler(void *, void *, void *)
     };
 
     data_min_widget_create(
-        &inside_hmdty_widget,
+        &inside_hmdty_data_widget,
         60,
         50,
         85,
         30
     );
 
-    lv_label_set_text(inside_hmdty_widget.data_label, "50%");
+    lv_label_set_text(inside_hmdty_data_widget.data_label, "50%");
 
     /*-------------------*/
     /* Time frame widget */
@@ -355,8 +386,15 @@ void display_handler(void *, void *, void *)
         if (ret != 0) {
             LOG_ERR("Failed to get forecast data from the queue: %d", ret);
         }
-        //sprintf(hmdty_outside_data_str, "%lu", humidity_outside);
 
+        data_widget_update(&outside_temp_data_widget, forecast.temperature);
+        data_widget_update(&outside_hmdty_data_widget, forecast.humidity);
+        data_widget_update(&outside_winds_data_widget, forecast.wind_speed);
+        data_widget_update(&outside_uvi_data_widget, forecast.uvi);
+
+        data_min_widget_update(&inside_temp_data_widget, sensor_value_to_double(&temperature_inside));
+        data_min_widget_update(&inside_hmdty_data_widget, sensor_value_to_double(&humidity_inside));
+        
         if (scr_pressed == 1) {
             scr_pressed = 0;
             if (lv_scr_act() == forecast_scr) {
