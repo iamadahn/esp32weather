@@ -499,3 +499,30 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
     );
 }
 
+static void data_widget_update(struct data_widget *widget, struct forecast_data data)
+{
+    if (widget == NULL)
+        return;
+
+    char buf[32];
+    sprintf(buf, "%.1f", data.current);
+    lv_label_set_text(widget->data_current_label, buf);
+
+    sprintf(buf, "%.1f", data.max);
+    lv_label_set_text(widget->data_max_label, buf);
+
+    sprintf(buf, "%.1f", data.min);
+    lv_label_set_text(widget->data_min_label, buf);
+}
+
+static void data_min_widget_update(struct data_min_widget *widget, double value)
+{
+    if (widget == NULL)
+        return;
+
+    char buf[32];
+
+    sprintf(buf, "%.1f", value);
+    lv_label_set_text(widget->data_label, buf);
+}
+
