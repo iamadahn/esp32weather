@@ -31,9 +31,9 @@ LV_FONT_DECLARE(jetbrains_28);
 static unsigned char scr_pressed = 0;
 
 extern struct k_msgq temperature_inside_msgq,
-    humidity_inside_msgq,
-    forecast_async_state_msgq,
-    forecast_data_msgq;
+                     humidity_inside_msgq,
+                     forecast_async_state_msgq,
+                     forecast_data_msgq;
 
 static lv_obj_t *forecast_scr, *wife_scr;
 

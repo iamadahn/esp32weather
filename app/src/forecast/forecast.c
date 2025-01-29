@@ -34,8 +34,8 @@ static void response_cb(struct http_response *response,
                         enum http_final_call final_data,
                         void *user_data);
 static int forecast_response_parse(char *response);
-static int forecast_array_get_min_max(cJSON *array, struct forecast_data *data);
-static int forecast_array_get_current(cJSON *array, struct forecast_data *data, unsigned int current_hour);
+static int forecast_array_get_min_max(cJSON *array, struct widget_data *data);
+static int forecast_array_get_current(cJSON *array, struct widget_data *data, unsigned int current_hour);
 static int sntp_sync_time(void);
 
 static int socket_setup(const char* server, const char* port, int *sock)
@@ -179,7 +179,7 @@ static int forecast_response_parse(char *response)
     return 0;
 }
 
-static int forecast_array_get_min_max(cJSON *array, struct forecast_data *data)
+static int forecast_array_get_min_max(cJSON *array, struct widget_data *data)
 {
     if (!cJSON_IsArray(array)) {
         LOG_ERR("Not an array");
@@ -201,7 +201,7 @@ static int forecast_array_get_min_max(cJSON *array, struct forecast_data *data)
     return 0;
 }
 
-static int forecast_array_get_current(cJSON *array, struct forecast_data *data, unsigned int current_hour)
+static int forecast_array_get_current(cJSON *array, struct widget_data *data, unsigned int current_hour)
 {
     if (!cJSON_IsArray(array)) {
         LOG_ERR("Not an array");

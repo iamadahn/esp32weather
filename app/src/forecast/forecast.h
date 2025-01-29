@@ -1,17 +1,13 @@
 #ifndef FORECAST_H_
 #define FORECAST_H_ 
 
-struct forecast_data {
-    double max;
-    double min;
-    double current;
-};
+#include "display/widgets.h"
 
 struct forecast {
-    struct forecast_data temperature;
-    struct forecast_data humidity;
-    struct forecast_data wind_speed;
-    struct forecast_data uvi;
+    struct widget_data temperature;
+    struct widget_data humidity;
+    struct widget_data wind_speed;
+    struct widget_data uvi;
 };
 
 void forecast_handler(void *, void *, void *);

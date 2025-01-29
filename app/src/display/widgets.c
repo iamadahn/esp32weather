@@ -499,7 +499,7 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
     );
 }
 
-static void data_widget_update(struct data_widget *widget, struct forecast_data data)
+void data_widget_update(struct data_widget *widget, struct widget_data data)
 {
     if (widget == NULL)
         return;
@@ -515,7 +515,7 @@ static void data_widget_update(struct data_widget *widget, struct forecast_data 
     lv_label_set_text(widget->data_min_label, buf);
 }
 
-static void data_min_widget_update(struct data_min_widget *widget, double value)
+void data_min_widget_update(struct data_min_widget *widget, double value)
 {
     if (widget == NULL)
         return;

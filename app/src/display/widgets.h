@@ -82,6 +82,12 @@ struct time_and_date_widget {
     lv_event_code_t event_code;
 };
 
+struct widget_data {
+    double max;
+    double min;
+    double current;
+};
+
 void frame_widget_create(struct frame_widget *widget,
                          unsigned int x_start,
                          unsigned int y_start,
@@ -106,7 +112,7 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
                                  unsigned int x_start,
                                  unsigned int y_start);
 
-void data_widget_update(struct data_widget *widget, struct forecast_data data);
+void data_widget_update(struct data_widget *widget, struct widget_data data);
 void data_min_widget_update(struct data_min_widget *widget, double value);
 
 #endif
