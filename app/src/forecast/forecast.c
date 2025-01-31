@@ -162,7 +162,7 @@ static int forecast_response_parse(char *response)
         LOG_ERR("Error parsing current temperature");
 
     if (cJSON_IsNumber(humidity_current))
-        forecast.humidity.current = temperature_current->valuedouble;
+        forecast.humidity.current = humidity_current->valuedouble;
     else
         LOG_ERR("Error parsing current humidity");
     /* TODO - need to initialise rtc and ntp and use correct time */

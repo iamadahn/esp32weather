@@ -499,20 +499,28 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
     );
 }
 
-void data_widget_update(struct data_widget *widget, struct widget_data data)
+void data_widget_update(struct data_widget *widget, struct widget_data data, bool raw_value)
 {
     if (widget == NULL)
         return;
 
     char buf[32];
-    sprintf(buf, "%.1f", data.current);
-    lv_label_set_text(widget->data_current_label, buf);
 
-    sprintf(buf, "%.1f", data.max);
-    lv_label_set_text(widget->data_max_label, buf);
-
-    sprintf(buf, "%.1f", data.min);
-    lv_label_set_text(widget->data_min_label, buf);
+    if (raw_value) {
+        sprintf(buf, "%.1f", data.current);
+        lv_label_set_text(widget->data_current_label, buf);
+        sprintf(buf, "%.1f", data.max);
+        lv_label_set_text(widget->data_max_label, buf);
+        sprintf(buf, "%.1f", data.min);
+        lv_label_set_text(widget->data_min_label, buf);
+    } else {
+        sprintf(buf, "%d", (int)data.current);
+        lv_label_set_text(widget->data_current_label, buf);
+        sprintf(buf, "%d", (int)data.max);
+        lv_label_set_text(widget->data_max_label, buf);
+        sprintf(buf, "%d", (int)data.min);
+        lv_label_set_text(widget->data_min_label, buf);
+    }
 }
 
 void data_min_widget_update(struct data_min_widget *widget, double value)

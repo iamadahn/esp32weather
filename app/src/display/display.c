@@ -356,10 +356,10 @@ void display_handler(void *, void *, void *)
             LOG_ERR("Failed to get forecast data from the queue: %d", ret);
         }
 
-        data_widget_update(&outside_temp_data_widget, forecast.temperature);
-        data_widget_update(&outside_hmdty_data_widget, forecast.humidity);
-        data_widget_update(&outside_winds_data_widget, forecast.wind_speed);
-        data_widget_update(&outside_uvi_data_widget, forecast.uvi);
+        data_widget_update(&outside_temp_data_widget, forecast.temperature, true);
+        data_widget_update(&outside_hmdty_data_widget, forecast.humidity, false);
+        data_widget_update(&outside_winds_data_widget, forecast.wind_speed, true);
+        data_widget_update(&outside_uvi_data_widget, forecast.uvi, true);
 
         data_min_widget_update(&inside_temp_data_widget, sensor_value_to_double(&temperature_inside));
         data_min_widget_update(&inside_hmdty_data_widget, sensor_value_to_double(&humidity_inside));
