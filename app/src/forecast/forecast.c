@@ -113,13 +113,8 @@ static void response_cb(struct http_response *response, enum http_final_call fin
     forecast_response_parse(strchr(response->recv_buf, '{'));
     
     unsigned char forecast_async_state = 1;
-    k_msgq_purge(&forecast_async_state_msgq);
-    int ret = k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT);
-    if (ret != 0) {
-        LOG_ERR("Failed to push to wifi state queue");
-    }
-
-    sntp_sync_time();
+    while (k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT) != 0)
+        k_msgq_purge(&forecast_async_state_msgq);
 }
 
 static int forecast_response_parse(char *response)
@@ -148,6 +143,13 @@ static int forecast_response_parse(char *response)
     cJSON *wind_speed_array = cJSON_GetObjectItemCaseSensitive(hourly, "wind_speed_10m");
     cJSON *uvi_array = cJSON_GetObjectItemCaseSensitive(hourly, "uv_index");
 
+    struct timespec tspec;
+    struct tm *real_time;
+    clock_gettime(CLOCK_REALTIME, &tspec);
+
+    tspec.tv_sec += (TIMEZONE_OFFSET * 3600);
+    real_time = gmtime(&tspec.tv_sec);
+
     struct forecast forecast;
     forecast_array_get_min_max(temperature_array, &forecast.temperature);
     forecast_array_get_min_max(humidity_array, &forecast.humidity);
@@ -163,10 +165,9 @@ static int forecast_response_parse(char *response)
         forecast.humidity.current = humidity_current->valuedouble;
     else
         LOG_ERR("Error parsing current humidity");
-    /* TODO - need to initialise rtc and ntp and use correct time */
-    forecast_array_get_current(wind_speed_array, &forecast.wind_speed, 0);
-    forecast_array_get_current(uvi_array, &forecast.uvi, 0);
-    /*------------------------------------------------------------*/
+
+    forecast_array_get_current(wind_speed_array, &forecast.wind_speed, real_time->tm_hour);
+    forecast_array_get_current(uvi_array, &forecast.uvi, real_time->tm_hour);
 
     while (k_msgq_put(&forecast_data_msgq, &forecast, K_NO_WAIT) != 0) {
         k_msgq_purge(&forecast_data_msgq);
@@ -234,12 +235,10 @@ static int sntp_sync_time(void) {
 
 void forecast_handler(void *, void *, void *) {
     unsigned char forecast_async_state = 0;
-    int ret = k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT);
-    if (ret != 0) {
-        LOG_ERR("Failed to push to wifi state queue");
-    }
+    while (k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT) != 0)
+        k_msgq_purge(&forecast_data_msgq);
     
-    ret = wifi_connect(WIFI_USER_SSID, WIFI_USER_PSK);
+    int ret = wifi_connect(WIFI_USER_SSID, WIFI_USER_PSK);
 
     if (ret != 0) {
         LOG_ERR("Failed to connect to provided wifi station.");
@@ -247,11 +246,14 @@ void forecast_handler(void *, void *, void *) {
     } else {
         LOG_INF("Succesfully connected to provided wifi station.");
     }
-   
-    forecast_get(FORECAST_SERVER, FORECAST_APICALL);
- 
 
     while (true) {
-        k_msleep(100);
+        sntp_sync_time();
+        forecast_get(FORECAST_SERVER, FORECAST_APICALL);
+        k_sleep(K_MINUTES(30));
+
+        forecast_async_state = 1;
+        while (k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT) != 0)
+            k_msgq_purge(&forecast_data_msgq);
     }
 }

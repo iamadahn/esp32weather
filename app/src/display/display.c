@@ -1,6 +1,7 @@
 #include "display.h"
 #include "widgets.h"
 #include "forecast/forecast.h"
+#include "forecast/user_data.h"
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
@@ -362,6 +363,7 @@ void display_handler(void *, void *, void *)
 	    struct timespec tspec;
         struct tm *real_time;
         clock_gettime(CLOCK_REALTIME, &tspec);
+        tspec.tv_sec += (TIMEZONE_OFFSET * 3600);
         real_time = gmtime(&tspec.tv_sec);
 
         data_widget_update(&outside_temp_data_widget, forecast.temperature, true);
@@ -390,7 +392,7 @@ void display_handler(void *, void *, void *)
         }            
 
         lv_task_handler();
-        k_msleep(500);
+        k_msleep(100);
     }
 }
 
