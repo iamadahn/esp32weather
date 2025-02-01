@@ -62,7 +62,7 @@ void ths_handler(void *, void *, void *)
             k_msleep(5000);
             failure_detected = false;
         } else {
-            k_msleep(100);
+            k_msleep(1000);
         }
     }
 }
