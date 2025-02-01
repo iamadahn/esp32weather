@@ -2,18 +2,21 @@
 #include "widgets.h"
 #include "forecast/forecast.h"
 
+#include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/display.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/sensor.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/sys/timeutil.h>
+#include <zephyr/posix/time.h>
+
 #include <lvgl.h>
+#include <lvgl_input_device.h>
+
 #include <stdio.h>
 #include <string.h>
-#include <zephyr/kernel.h>
-#include <lvgl_input_device.h>
-#include <zephyr/drivers/gpio.h>
-#include <zephyr/logging/log.h>
 
 #define SCR_WIDTH 320
 #define SCR_HEIGHT 240
@@ -51,7 +54,7 @@ void display_handler(void *, void *, void *)
 
     display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
     if (!device_is_ready(display_dev)) {
-        LOG_ERR("Device not ready, aborting test");
+        LOG_ERR("Display device not ready, aborting test");
         return;
 	}
 
@@ -356,6 +359,11 @@ void display_handler(void *, void *, void *)
             LOG_ERR("Failed to get forecast data from the queue: %d", ret);
         }
 
+	    struct timespec tspec;
+        struct tm *real_time;
+        clock_gettime(CLOCK_REALTIME, &tspec);
+        real_time = gmtime(&tspec.tv_sec);
+
         data_widget_update(&outside_temp_data_widget, forecast.temperature, true);
         data_widget_update(&outside_hmdty_data_widget, forecast.humidity, false);
         data_widget_update(&outside_winds_data_widget, forecast.wind_speed, true);
@@ -363,6 +371,14 @@ void display_handler(void *, void *, void *)
 
         data_min_widget_update(&inside_temp_data_widget, sensor_value_to_double(&temperature_inside));
         data_min_widget_update(&inside_hmdty_data_widget, sensor_value_to_double(&humidity_inside));
+
+        char buf[32];
+        sprintf(buf, "%02d:%02d", real_time->tm_hour, real_time->tm_min);
+        lv_label_set_text(time_and_date_widget_instance.time_label, buf);
+        sprintf(buf, "%02d.%02d.%d", real_time->tm_mday, real_time->tm_mon + 1, real_time->tm_year + 1900);
+        lv_label_set_text(time_and_date_widget_instance.date_label, buf);
+        sprintf(buf, "%d", real_time->tm_wday);
+        lv_label_set_text(time_and_date_widget_instance.day_of_week_label, buf);
         
         if (scr_pressed == 1) {
             scr_pressed = 0;
@@ -374,7 +390,7 @@ void display_handler(void *, void *, void *)
         }            
 
         lv_task_handler();
-        k_sleep(K_MSEC(100));
+        k_msleep(500);
     }
 }
 
