@@ -338,13 +338,14 @@ void display_handler(void *, void *, void *)
     unsigned char forecast_async_state = 0;
     while (forecast_async_state != 1) {
         k_msgq_peek(&forecast_async_state_msgq, &forecast_async_state);
-        k_sleep(K_MSEC(100));
+        k_sleep(K_MSEC(1000));
     }
 
     while (1) {
         static struct sensor_value temperature_inside, humidity_inside;
         static struct forecast forecast;
 
+        /*
         int ret = k_msgq_peek(&temperature_inside_msgq, &temperature_inside);
         if (ret != 0) {
             LOG_ERR("Failed to get inside temperature data from the queue: %d", ret);
@@ -354,8 +355,9 @@ void display_handler(void *, void *, void *)
         if (ret != 0) {
             LOG_ERR("Failed to get inside humidity data from the queue: %d", ret);
         }
+        */
 
-        ret = k_msgq_peek(&forecast_data_msgq, &forecast);
+        int ret = k_msgq_peek(&forecast_data_msgq, &forecast);
         if (ret != 0) {
             LOG_ERR("Failed to get forecast data from the queue: %d", ret);
         }
@@ -392,7 +394,14 @@ void display_handler(void *, void *, void *)
         }            
 
         lv_task_handler();
-        k_msleep(100);
+
+        k_msgq_peek(&forecast_async_state_msgq, &forecast_async_state);
+        if (forecast_async_state == 0) {
+            LOG_INF("Sleeping");
+            k_msleep(10000);
+        } else {
+            k_msleep(100);
+        }
     }
 }
 

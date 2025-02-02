@@ -13,14 +13,14 @@ K_MSGQ_DEFINE(humidity_inside_msgq, sizeof(struct sensor_value), 1, 1);
 
 void ths_handler(void *, void *, void *)
 {
-    const struct device *const aht30 = DEVICE_DT_GET_ONE(aosong_aht20);
-
     /* Let the async json request handle itself succesfully */
     unsigned char forecast_async_state = 0;
     while (forecast_async_state != 1) {
         k_msgq_peek(&forecast_async_state_msgq, &forecast_async_state);
-        k_sleep(K_MSEC(100));
+        k_sleep(K_MSEC(1000));
     }
+
+    const struct device *const aht30 = DEVICE_DT_GET_ONE(aosong_aht20);
 
     if (!device_is_ready(aht30)) {
         LOG_ERR("Failed to initialise aht30 sensor.");
@@ -61,8 +61,14 @@ void ths_handler(void *, void *, void *)
         if (failure_detected) {
             k_msleep(5000);
             failure_detected = false;
+        }
+
+        k_msgq_peek(&forecast_async_state_msgq, &forecast_async_state);
+        if (forecast_async_state == 0) {
+            LOG_INF("Sleeping");
+            k_msleep(10000);
         } else {
-            k_msleep(1000);
+            k_msleep(100);
         }
     }
 }

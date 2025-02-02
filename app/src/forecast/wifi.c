@@ -113,17 +113,17 @@ int wifi_connect(const void* ssid, const void* psk)
     struct addrinfo hints, *res;
     int sock;
 
-    LOG_INF("Google HTTP GET test request - google.com:80/\n");
+    LOG_INF("Google HTTP GET test request - google.com:80/");
     k_msleep(100);
 
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     int ret = getaddrinfo(API_SERVER, API_URL, &hints, &res);
-    LOG_INF("getaddrinfo status: %d\n", ret);
+    LOG_INF("getaddrinfo status: %d", ret);
     k_msleep(100);
 
     if (ret != 0) {
-        LOG_INF("Unable to resolve address, quitting\n");
+        LOG_INF("Unable to resolve address, quitting");
         return 1;
     }
 

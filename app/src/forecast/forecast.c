@@ -1,38 +1,24 @@
 #include "forecast.h"
 #include "user_data.h"
 #include "wifi.h"
-#include "cjson/cJSON.h"
 
 #include <float.h>
 
 #include <zephyr/kernel.h>
-#include <zephyr/net/socket.h>
 #include <zephyr/data/json.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/timeutil.h>
 #include <zephyr/posix/time.h>
 
-#include <zephyr/net/net_ip.h>
-#include <zephyr/net/tls_credentials.h>
-#include <zephyr/net/http/client.h>
-#include <zephyr/net/sntp.h>
-
 LOG_MODULE_REGISTER(forecast);
 
 K_MSGQ_DEFINE(forecast_async_state_msgq, sizeof(unsigned short), 1, 1);
 K_MSGQ_DEFINE(forecast_data_msgq, sizeof(struct forecast), 1, 1);
+K_SEM_DEFINE(async_req_sem, 1, 1);
 
 unsigned char recv_buf[3072];
 
 static int socket_setup(const char* server, const char* port, int *sock);
-static int forecast_get(const char *server, const char *api_key);
-static void response_cb(struct http_response *response,
-                        enum http_final_call final_data,
-                        void *user_data);
-static int forecast_response_parse(char *response);
-static int forecast_array_get_min_max(cJSON *array, struct widget_data *data);
-static int forecast_array_get_current(cJSON *array, struct widget_data *data, unsigned int current_hour);
-static int sntp_sync_time(void);
 
 static int socket_setup(const char* server, const char* port, int *sock)
 {
@@ -61,6 +47,7 @@ static int socket_setup(const char* server, const char* port, int *sock)
     ret = zsock_connect(*sock, res->ai_addr, res->ai_addrlen);
     if (ret < 0) {
         LOG_ERR("Cannot connect to remote - %d.", -errno);
+        zsock_shutdown(*sock, SHUT_RDWR);
         zsock_close(*sock);
         *sock = -1;
         zsock_freeaddrinfo(res);
@@ -71,15 +58,19 @@ static int socket_setup(const char* server, const char* port, int *sock)
     return 0;
 }
 
-static int forecast_get(const char *server, const char *api_key)
+int forecast_get(const char *server, const char *api_key)
 {
-    int sock;
+    k_sem_take(&async_req_sem, K_FOREVER);
+
+    int sock = -1;
     struct sockaddr_in addr;
-    int timeout = 10 * MSEC_PER_SEC;
+    int timeout = 5 * MSEC_PER_SEC;
 
     int ret = socket_setup(server, "80", &sock);
     if (sock < 0) {
         LOG_ERR("Failed to establish HTTP connection.");
+    } else {
+        LOG_INF("HTTP connection to %s established", FORECAST_SERVER);
     }
 
     struct http_request req;
@@ -93,14 +84,31 @@ static int forecast_get(const char *server, const char *api_key)
     req.recv_buf = recv_buf;
     req.recv_buf_len = sizeof(recv_buf);
 
-    ret = http_client_req(sock, &req, timeout, NULL);
+    while (http_client_req(sock, &req, timeout, NULL) < 0) {
+        LOG_ERR("API HTTP request failed, retrying in 1 sec...");
+        k_msleep(1000);
+        zsock_shutdown(sock, SHUT_RDWR);
+        zsock_close(sock);
+        ret = socket_setup(server, "80", &sock);
 
+        memset(&req, 0, sizeof(req));
+
+        req.method = HTTP_GET;
+        req.url = api_key;
+        req.host = server;
+        req.protocol = "HTTP/1.1";
+        req.response = response_cb;
+        req.recv_buf = recv_buf;
+        req.recv_buf_len = sizeof(recv_buf);
+    }
+
+    zsock_shutdown(sock, SHUT_RDWR);
     zsock_close(sock);
 
     return ret;
 }
 
-static void response_cb(struct http_response *response, enum http_final_call final_data, void *user_data)
+void response_cb(struct http_response *response, enum http_final_call final_data, void *user_data)
 {
     if (final_data == HTTP_DATA_MORE) {
         LOG_INF("Partial data received (%zd bytes).", response->data_len);
@@ -111,13 +119,15 @@ static void response_cb(struct http_response *response, enum http_final_call fin
     LOG_INF("GET response status - %s.", response->http_status);
 
     forecast_response_parse(strchr(response->recv_buf, '{'));
+
+    k_sem_give(&async_req_sem);
     
     unsigned char forecast_async_state = 1;
     while (k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT) != 0)
         k_msgq_purge(&forecast_async_state_msgq);
 }
 
-static int forecast_response_parse(char *response)
+int forecast_response_parse(char *response)
 {
     cJSON_Hooks hooks = {
         .malloc_fn = malloc,
@@ -178,7 +188,7 @@ static int forecast_response_parse(char *response)
     return 0;
 }
 
-static int forecast_array_get_min_max(cJSON *array, struct widget_data *data)
+int forecast_array_get_min_max(cJSON *array, struct widget_data *data)
 {
     if (!cJSON_IsArray(array)) {
         LOG_ERR("Not an array");
@@ -200,7 +210,7 @@ static int forecast_array_get_min_max(cJSON *array, struct widget_data *data)
     return 0;
 }
 
-static int forecast_array_get_current(cJSON *array, struct widget_data *data, unsigned int current_hour)
+int forecast_array_get_current(cJSON *array, struct widget_data *data, unsigned int current_hour)
 {
     if (!cJSON_IsArray(array)) {
         LOG_ERR("Not an array");
@@ -213,7 +223,7 @@ static int forecast_array_get_current(cJSON *array, struct widget_data *data, un
 }
 
 
-static int sntp_sync_time(void) {
+int sntp_sync_time(void) {
     int ret;
 	struct sntp_time now;
 	struct timespec tspec;
@@ -236,8 +246,8 @@ static int sntp_sync_time(void) {
 void forecast_handler(void *, void *, void *) {
     unsigned char forecast_async_state = 0;
     while (k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT) != 0)
-        k_msgq_purge(&forecast_data_msgq);
-    
+        k_msgq_purge(&forecast_async_state_msgq);
+
     int ret = wifi_connect(WIFI_USER_SSID, WIFI_USER_PSK);
 
     if (ret != 0) {
@@ -250,10 +260,13 @@ void forecast_handler(void *, void *, void *) {
     while (true) {
         sntp_sync_time();
         forecast_get(FORECAST_SERVER, FORECAST_APICALL);
-        k_sleep(K_MINUTES(30));
 
-        forecast_async_state = 1;
+        LOG_INF("sleep");
+        k_sched_unlock();
+        k_msleep(10000);
+
+        forecast_async_state = 0;
         while (k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT) != 0)
-            k_msgq_purge(&forecast_data_msgq);
+            k_msgq_purge(&forecast_async_state_msgq);
     }
 }
