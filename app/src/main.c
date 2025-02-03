@@ -96,13 +96,16 @@ int main(void)
     LOG_INF("Succesfully created ths (temperature and humudity sensor) thread.");
     */
 
-    const struct device *display_dev;
-
-    display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
+    const struct device *display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
     if (!device_is_ready(display_dev)) {
-        LOG_ERR("Display device not ready, aborting test");
-        return -1;
-	}
+        LOG_ERR("Display device not ready");
+    }
+
+	const struct device *const aht30 = DEVICE_DT_GET_ONE(aosong_aht20);
+
+    if (!device_is_ready(aht30)) {
+        LOG_ERR("Failed to initialise aht30 sensor.");
+    }
 
     const struct gpio_dt_spec display_backlight = GPIO_DT_SPEC_GET(DT_ALIAS(backlight), gpios);
     gpio_pin_configure_dt(&display_backlight, GPIO_OUTPUT_ACTIVE);
@@ -404,6 +407,25 @@ int main(void)
         static struct sensor_value temperature_inside, humidity_inside;
         static struct forecast forecast;
 
+        bool failure_detected = false;
+
+        ret = sensor_sample_fetch(aht30);
+        if (ret != 0) {
+           LOG_ERR("Failed to fetch sensor: %d", ret);
+           failure_detected = true;
+        }
+
+        ret = sensor_channel_get(aht30, SENSOR_CHAN_AMBIENT_TEMP, &temperature_inside);
+        if (ret != 0) {
+           LOG_ERR("Failed to get temperature data: %d", ret);
+           failure_detected = true;
+        }
+
+        ret = sensor_channel_get(aht30, SENSOR_CHAN_HUMIDITY, &humidity_inside);
+        if (ret != 0) {
+           LOG_ERR("Failed to get humidity data: %d", ret);
+           failure_detected = true;
+        }
         /*
         int ret = k_msgq_peek(&temperature_inside_msgq, &temperature_inside);
         if (ret != 0) {
@@ -455,17 +477,10 @@ int main(void)
         lv_task_handler();
 
         if (real_time->tm_hour - last_sync_hour != 0) {
+            LOG_INF("Current time - %d:%d:%d, updating the forecast", real_time->tm_hour, real_time->tm_min, real_time->tm_sec);
             sntp_sync_time();
             forecast_get(FORECAST_SERVER, FORECAST_APICALL);
             last_sync_hour = real_time->tm_hour;
-        }
-
-        static int i = 0;
-        i++;
-        if (i == 100) {
-            i = 0;
-            sntp_sync_time();
-            forecast_get(FORECAST_SERVER, FORECAST_APICALL);
             while (k_sem_count_get(&async_req_sem) != 1) {
                 LOG_INF("Waiting for semaphore");
                 k_msleep(1000);

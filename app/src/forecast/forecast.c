@@ -228,17 +228,17 @@ int sntp_sync_time(void) {
 	struct sntp_time now;
 	struct timespec tspec;
 
-	ret = sntp_simple(SNTP_SERVER, SYS_FOREVER_MS, &now);
-	if (ret == 0) {
-		tspec.tv_sec = now.seconds;
-		tspec.tv_nsec = ((uint64_t)now.fraction * (1000lu * 1000lu * 1000lu)) >> 32;
+	while ((ret = sntp_simple(SNTP_SERVER, SYS_FOREVER_MS, &now)) != 0) {
+        LOG_ERR("Failed to acquire SNTP, code - %d, retrying in 1 sec...", ret);
+        k_msleep(1000);
+    }
+        
+    tspec.tv_sec = now.seconds;
+    tspec.tv_nsec = ((uint64_t)now.fraction * (1000lu * 1000lu * 1000lu)) >> 32;
 
-		clock_settime(CLOCK_REALTIME, &tspec);
+    clock_settime(CLOCK_REALTIME, &tspec);
 
-		LOG_INF("Acquired time from NTP server: %u", (uint32_t)tspec.tv_sec);
-	} else {
-		LOG_ERR("Failed to acquire SNTP, code %d\n", ret);
-	}
+    LOG_INF("Acquired time from NTP server: %u", (uint32_t)tspec.tv_sec);
 
     return ret;
 }
