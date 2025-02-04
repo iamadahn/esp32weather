@@ -12,15 +12,15 @@
 
 LOG_MODULE_REGISTER(forecast);
 
-K_MSGQ_DEFINE(forecast_async_state_msgq, sizeof(unsigned short), 1, 1);
-K_MSGQ_DEFINE(forecast_data_msgq, sizeof(struct forecast), 1, 1);
+K_MSGQ_DEFINE(forecast_data_msgq, sizeof(struct forecast_data_full), 1, 1);
 K_SEM_DEFINE(async_req_sem, 1, 1);
 
-unsigned char recv_buf[3072];
+static unsigned char recv_buf[3072];
 
-static int socket_setup(const char* server, const char* port, int *sock);
+static int forecast_socket_setup(const char* server, const char* port, int *sock);
+static void forecast_response_cb(struct http_response *response, enum http_final_call final_data, void *user_data);
 
-static int socket_setup(const char* server, const char* port, int *sock)
+static int forecast_socket_setup(const char* server, const char* port, int *sock)
 {
     int ret = 0;
 
@@ -66,7 +66,7 @@ int forecast_get(const char *server, const char *api_key)
     struct sockaddr_in addr;
     int timeout = 5 * MSEC_PER_SEC;
 
-    int ret = socket_setup(server, "80", &sock);
+    int ret = forecast_socket_setup(server, "80", &sock);
     if (sock < 0) {
         LOG_ERR("Failed to establish HTTP connection.");
     } else {
@@ -80,27 +80,11 @@ int forecast_get(const char *server, const char *api_key)
     req.url = api_key;
     req.host = server;
     req.protocol = "HTTP/1.1";
-    req.response = response_cb;
+    req.response = forecast_response_cb;
     req.recv_buf = recv_buf;
     req.recv_buf_len = sizeof(recv_buf);
 
-    while (http_client_req(sock, &req, timeout, NULL) < 0) {
-        LOG_ERR("API HTTP request failed, retrying in 1 sec...");
-        k_msleep(1000);
-        zsock_shutdown(sock, SHUT_RDWR);
-        zsock_close(sock);
-        ret = socket_setup(server, "80", &sock);
-
-        memset(&req, 0, sizeof(req));
-
-        req.method = HTTP_GET;
-        req.url = api_key;
-        req.host = server;
-        req.protocol = "HTTP/1.1";
-        req.response = response_cb;
-        req.recv_buf = recv_buf;
-        req.recv_buf_len = sizeof(recv_buf);
-    }
+    ret = http_client_req(sock, &req, timeout, NULL); 
 
     zsock_shutdown(sock, SHUT_RDWR);
     zsock_close(sock);
@@ -108,7 +92,7 @@ int forecast_get(const char *server, const char *api_key)
     return ret;
 }
 
-void response_cb(struct http_response *response, enum http_final_call final_data, void *user_data)
+static void forecast_response_cb(struct http_response *response, enum http_final_call final_data, void *user_data)
 {
     if (final_data == HTTP_DATA_MORE) {
         LOG_INF("Partial data received (%zd bytes).", response->data_len);
@@ -121,10 +105,6 @@ void response_cb(struct http_response *response, enum http_final_call final_data
     forecast_response_parse(strchr(response->recv_buf, '{'));
 
     k_sem_give(&async_req_sem);
-    
-    unsigned char forecast_async_state = 1;
-    while (k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT) != 0)
-        k_msgq_purge(&forecast_async_state_msgq);
 }
 
 int forecast_response_parse(char *response)
@@ -160,7 +140,7 @@ int forecast_response_parse(char *response)
     tspec.tv_sec += (TIMEZONE_OFFSET * 3600);
     real_time = gmtime(&tspec.tv_sec);
 
-    struct forecast forecast;
+    struct forecast_data_full forecast;
     forecast_array_get_min_max(temperature_array, &forecast.temperature);
     forecast_array_get_min_max(humidity_array, &forecast.humidity);
     forecast_array_get_min_max(wind_speed_array, &forecast.wind_speed);
@@ -188,7 +168,7 @@ int forecast_response_parse(char *response)
     return 0;
 }
 
-int forecast_array_get_min_max(cJSON *array, struct widget_data *data)
+int forecast_array_get_min_max(cJSON *array, struct forecast_data *data)
 {
     if (!cJSON_IsArray(array)) {
         LOG_ERR("Not an array");
@@ -210,7 +190,7 @@ int forecast_array_get_min_max(cJSON *array, struct widget_data *data)
     return 0;
 }
 
-int forecast_array_get_current(cJSON *array, struct widget_data *data, unsigned int current_hour)
+int forecast_array_get_current(cJSON *array, struct forecast_data *data, unsigned int current_hour)
 {
     if (!cJSON_IsArray(array)) {
         LOG_ERR("Not an array");
@@ -223,14 +203,15 @@ int forecast_array_get_current(cJSON *array, struct widget_data *data, unsigned 
 }
 
 
-int sntp_sync_time(void) {
+int forecast_sntp_sync(void) {
     int ret;
 	struct sntp_time now;
 	struct timespec tspec;
 
-	while ((ret = sntp_simple(SNTP_SERVER, SYS_FOREVER_MS, &now)) != 0) {
-        LOG_ERR("Failed to acquire SNTP, code - %d, retrying in 1 sec...", ret);
-        k_msleep(1000);
+	ret = sntp_simple(SNTP_SERVER, SYS_FOREVER_MS, &now);
+    if (ret != 0) {
+        LOG_ERR("SNTP sync error - %d code", ret);
+        return -1;
     }
         
     tspec.tv_sec = now.seconds;
@@ -243,30 +224,3 @@ int sntp_sync_time(void) {
     return ret;
 }
 
-void forecast_handler(void *, void *, void *) {
-    unsigned char forecast_async_state = 0;
-    while (k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT) != 0)
-        k_msgq_purge(&forecast_async_state_msgq);
-
-    int ret = wifi_connect(WIFI_USER_SSID, WIFI_USER_PSK);
-
-    if (ret != 0) {
-        LOG_ERR("Failed to connect to provided wifi station.");
-        return;
-    } else {
-        LOG_INF("Succesfully connected to provided wifi station.");
-    }
-
-    while (true) {
-        sntp_sync_time();
-        forecast_get(FORECAST_SERVER, FORECAST_APICALL);
-
-        LOG_INF("sleep");
-        k_sched_unlock();
-        k_msleep(10000);
-
-        forecast_async_state = 0;
-        while (k_msgq_put(&forecast_async_state_msgq, &forecast_async_state, K_NO_WAIT) != 0)
-            k_msgq_purge(&forecast_async_state_msgq);
-    }
-}

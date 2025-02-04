@@ -2,6 +2,7 @@
 #define WIDGETS_H_
 
 #include "lvgl.h"
+#include "time.h"
 
 #define DEFAULT_OUTLINE 10
 
@@ -114,5 +115,6 @@ void time_and_date_widget_create(struct time_and_date_widget *widget,
 
 void data_widget_update(struct data_widget *widget, struct widget_data data, bool raw_value);
 void data_min_widget_update(struct data_min_widget *widget, double value);
+void time_and_date_widget_update(struct time_and_date_widget *widget, struct tm *time);
 
 #endif

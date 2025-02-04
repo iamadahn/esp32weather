@@ -534,3 +534,41 @@ void data_min_widget_update(struct data_min_widget *widget, double value)
     lv_label_set_text(widget->data_label, buf);
 }
 
+void time_and_date_widget_update(struct time_and_date_widget *widget, struct tm *time)
+{
+    char buf[32];
+    sprintf(buf, "%02d:%02d", time->tm_hour, time->tm_min);
+    lv_label_set_text(widget->time_label, buf);
+    sprintf(buf, "%02d.%02d.%d", time->tm_mday, time->tm_mon + 1, time->tm_year + 1900);
+    lv_label_set_text(widget->date_label, buf);
+    
+    switch (time->tm_wday) {
+        case 1:
+        lv_label_set_text(widget->day_of_week_label, "Monday");
+        break;
+
+        case 2:
+        lv_label_set_text(widget->day_of_week_label, "Tuesday");
+        break;
+
+        case 3:
+        lv_label_set_text(widget->day_of_week_label, "Wednesday");
+        break;
+
+        case 4:
+        lv_label_set_text(widget->day_of_week_label, "Thursday");
+        break;
+
+        case 5:
+        lv_label_set_text(widget->day_of_week_label, "Friday");
+        break;
+
+        case 6:
+        lv_label_set_text(widget->day_of_week_label, "Saturday");
+        break;
+
+        case 7:
+        lv_label_set_text(widget->day_of_week_label, "Sunday");
+        break;
+    }
+}

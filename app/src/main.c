@@ -32,26 +32,7 @@ LV_FONT_DECLARE(jetbrains_18);
 LV_FONT_DECLARE(jetbrains_20);
 LV_FONT_DECLARE(jetbrains_28);
 
-extern struct k_msgq temperature_inside_msgq,
-                     humidity_inside_msgq,
-                     forecast_async_state_msgq,
-                     forecast_data_msgq;
-
-extern struct k_sem async_req_sem;
-
-/*
-k_tid_t display_tid;
-K_THREAD_STACK_DEFINE(display_thread_stack_area, 4096);
-struct k_thread display_thread_data;
-
-k_tid_t forecast_tid;
-K_THREAD_STACK_DEFINE(forecast_thread_stack_area, 4096);
-struct k_thread forecast_thread_data;
-
-k_tid_t ths_tid;
-K_THREAD_STACK_DEFINE(ths_thread_stack_area, 512);
-struct k_thread ths_thread_data;
-*/
+extern struct k_msgq forecast_data_msgq;
 
 static unsigned char scr_pressed = 0;
 
@@ -62,39 +43,12 @@ static void scr_pressed_cb(lv_event_t *event);
 static void scr_pressed_cb(lv_event_t *event)
 {
     scr_pressed = 1;
-    printf("Clicked on screen!\n");
+    printf("Pressed screen!\n");
 }
 
 int main(void)
 {
-    LOG_INF("Succesfully booted esp32weather.");
-    LOG_INF("Creating threads...");
-
-    /*
-    display_tid = k_thread_create(&display_thread_data,
-                                          display_thread_stack_area,
-                                          K_THREAD_STACK_SIZEOF(display_thread_stack_area),
-                                          display_handler,
-                                          NULL, NULL, NULL,
-                                          4, 0, K_NO_WAIT); 
-    LOG_INF("Succesfully created display thread.");
-
-    forecast_tid = k_thread_create(&forecast_thread_data,
-                                          forecast_thread_stack_area,
-                                          K_THREAD_STACK_SIZEOF(forecast_thread_stack_area),
-                                          forecast_handler,
-                                          NULL, NULL, NULL,
-                                          3, 0, K_NO_WAIT);
-    LOG_INF("Succesfully created forecast thread."); 
-
-    ths_tid = k_thread_create(&ths_thread_data,
-                                      ths_thread_stack_area,
-                                      K_THREAD_STACK_SIZEOF(ths_thread_stack_area),
-                                      ths_handler,
-                                      NULL, NULL, NULL,
-                                      5, 0, K_NO_WAIT); 
-    LOG_INF("Succesfully created ths (temperature and humudity sensor) thread.");
-    */
+    LOG_INF("Booting iamforecast.");
 
     const struct device *display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
     if (!device_is_ready(display_dev)) {
@@ -384,14 +338,15 @@ int main(void)
 
     int ret = wifi_connect(WIFI_USER_SSID, WIFI_USER_PSK);
 
-    if (ret != 0) {
-        LOG_ERR("Failed to connect to provided wifi station.");
+    if (ret != 0) { LOG_ERR("Failed to connect to provided wifi station.");
         return -1;
     } else {
         LOG_INF("Succesfully connected to provided wifi station.");
     }
 
-    sntp_sync_time();
+    while ((ret = forecast_sntp_sync()) != 0) {
+        LOG_ERR("Failed to acquire STNP, retrying in 1 sec...");
+    }
 
     struct timespec tspec;
     struct tm *boot_time;
@@ -405,9 +360,28 @@ int main(void)
 
     while (true) {
         static struct sensor_value temperature_inside, humidity_inside;
-        static struct forecast forecast;
+        static struct forecast_data_full forecast;
 
         bool failure_detected = false;
+
+        struct tm *real_time;
+        clock_gettime(CLOCK_REALTIME, &tspec);
+        tspec.tv_sec += (TIMEZONE_OFFSET * 3600);
+        real_time = gmtime(&tspec.tv_sec);
+
+        if (real_time->tm_hour - last_sync_hour != 0) {
+            LOG_INF("Current time - %d:%d:%d, updating the forecast", real_time->tm_hour, real_time->tm_min, real_time->tm_sec);
+            while ((ret = forecast_sntp_sync()) != 0) {
+                LOG_ERR("Failed to acquire STNP, retrying in 1 sec...");
+            }
+
+            last_sync_hour = real_time->tm_hour;
+
+            while ((ret = forecast_get(FORECAST_SERVER, FORECAST_APICALL)) < 0) {
+                LOG_ERR("Failed to get forecast, retrying in 1 sec...");
+                k_msleep(1000);
+            }
+        }
 
         ret = sensor_sample_fetch(aht30);
         if (ret != 0) {
@@ -426,44 +400,37 @@ int main(void)
            LOG_ERR("Failed to get humidity data: %d", ret);
            failure_detected = true;
         }
-        /*
-        int ret = k_msgq_peek(&temperature_inside_msgq, &temperature_inside);
-        if (ret != 0) {
-            LOG_ERR("Failed to get inside temperature data from the queue: %d", ret);
-        }
-
-        ret = k_msgq_peek(&humidity_inside_msgq, &humidity_inside);
-        if (ret != 0) {
-            LOG_ERR("Failed to get inside humidity data from the queue: %d", ret);
-        }
-        */
 
         ret = k_msgq_peek(&forecast_data_msgq, &forecast);
         if (ret != 0) {
             LOG_ERR("Failed to get forecast data from the queue: %d", ret);
         }
 
-	    struct timespec tspec;
-        struct tm *real_time;
-        clock_gettime(CLOCK_REALTIME, &tspec);
-        tspec.tv_sec += (TIMEZONE_OFFSET * 3600);
-        real_time = gmtime(&tspec.tv_sec);
+        struct widget_data widget_data_buf;
+        widget_data_buf.current = forecast.temperature.current;
+        widget_data_buf.max = forecast.temperature.max;
+        widget_data_buf.min = forecast.temperature.min;
+        data_widget_update(&outside_temp_data_widget, widget_data_buf, true);
 
-        data_widget_update(&outside_temp_data_widget, forecast.temperature, true);
-        data_widget_update(&outside_hmdty_data_widget, forecast.humidity, false);
-        data_widget_update(&outside_winds_data_widget, forecast.wind_speed, true);
-        data_widget_update(&outside_uvi_data_widget, forecast.uvi, true);
+        widget_data_buf.current = forecast.humidity.current;
+        widget_data_buf.max = forecast.humidity.max;
+        widget_data_buf.min = forecast.humidity.min;
+        data_widget_update(&outside_hmdty_data_widget, widget_data_buf, false);
+
+        widget_data_buf.current = forecast.wind_speed.current;
+        widget_data_buf.max = forecast.wind_speed.max;
+        widget_data_buf.min = forecast.wind_speed.min;
+        data_widget_update(&outside_winds_data_widget, widget_data_buf, true);
+
+        widget_data_buf.current = forecast.uvi.current;
+        widget_data_buf.max = forecast.uvi.max;
+        widget_data_buf.min = forecast.uvi.min;
+        data_widget_update(&outside_uvi_data_widget, widget_data_buf, true);
 
         data_min_widget_update(&inside_temp_data_widget, sensor_value_to_double(&temperature_inside));
         data_min_widget_update(&inside_hmdty_data_widget, sensor_value_to_double(&humidity_inside));
 
-        char buf[32];
-        sprintf(buf, "%02d:%02d", real_time->tm_hour, real_time->tm_min);
-        lv_label_set_text(time_and_date_widget_instance.time_label, buf);
-        sprintf(buf, "%02d.%02d.%d", real_time->tm_mday, real_time->tm_mon + 1, real_time->tm_year + 1900);
-        lv_label_set_text(time_and_date_widget_instance.date_label, buf);
-        sprintf(buf, "%d", real_time->tm_wday);
-        lv_label_set_text(time_and_date_widget_instance.day_of_week_label, buf);
+        time_and_date_widget_update(&time_and_date_widget_instance, real_time);
         
         if (scr_pressed == 1) {
             scr_pressed = 0;
@@ -475,17 +442,6 @@ int main(void)
         }            
 
         lv_task_handler();
-
-        if (real_time->tm_hour - last_sync_hour != 0) {
-            LOG_INF("Current time - %d:%d:%d, updating the forecast", real_time->tm_hour, real_time->tm_min, real_time->tm_sec);
-            sntp_sync_time();
-            forecast_get(FORECAST_SERVER, FORECAST_APICALL);
-            last_sync_hour = real_time->tm_hour;
-            while (k_sem_count_get(&async_req_sem) != 1) {
-                LOG_INF("Waiting for semaphore");
-                k_msleep(1000);
-            }
-        }
 
         k_msleep(100);
     }
