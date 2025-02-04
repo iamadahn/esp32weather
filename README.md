@@ -11,4 +11,5 @@ Project contains:
 4. I2C temperature and humidity sensor AHT30.
 
 That's how interface looks (screenshot from lvgl simulator):
+
 ![Interface](https://github.com/iamadahn/iamforecast/blob/master/images/interface.png?raw=true)
