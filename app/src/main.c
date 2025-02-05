@@ -373,6 +373,7 @@ int main(void)
             LOG_INF("Current time - %d:%d:%d, updating the forecast", real_time->tm_hour, real_time->tm_min, real_time->tm_sec);
             while ((ret = forecast_sntp_sync()) != 0) {
                 LOG_ERR("Failed to acquire STNP, retrying in 1 sec...");
+                k_msleep(1000);
             }
 
             last_sync_hour = real_time->tm_hour;
@@ -404,6 +405,7 @@ int main(void)
         ret = k_msgq_peek(&forecast_data_msgq, &forecast);
         if (ret != 0) {
             LOG_ERR("Failed to get forecast data from the queue: %d", ret);
+            last_sync_hour = real_time->tm_hour - 1;
         }
 
         struct widget_data widget_data_buf;
