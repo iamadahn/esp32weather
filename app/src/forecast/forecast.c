@@ -13,7 +13,6 @@
 LOG_MODULE_REGISTER(forecast);
 
 K_MSGQ_DEFINE(forecast_data_msgq, sizeof(struct forecast_data_full), 1, 1);
-K_SEM_DEFINE(async_req_sem, 1, 1);
 
 static unsigned char recv_buf[3072];
 
@@ -60,8 +59,6 @@ static int forecast_socket_setup(const char* server, const char* port, int *sock
 
 int forecast_get(const char *server, const char *api_key)
 {
-    k_sem_take(&async_req_sem, K_FOREVER);
-
     int sock = -1;
     struct sockaddr_in addr;
     int timeout = 5 * MSEC_PER_SEC;
@@ -103,8 +100,6 @@ static void forecast_response_cb(struct http_response *response, enum http_final
     LOG_INF("GET response status - %s.", response->http_status);
 
     forecast_response_parse(strchr(response->recv_buf, '{'));
-
-    k_sem_give(&async_req_sem);
 }
 
 int forecast_response_parse(char *response)
