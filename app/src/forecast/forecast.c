@@ -131,8 +131,6 @@ int forecast_response_parse(char *response)
     struct timespec tspec;
     struct tm *real_time;
     clock_gettime(CLOCK_REALTIME, &tspec);
-
-    tspec.tv_sec += (TIMEZONE_OFFSET * 3600);
     real_time = gmtime(&tspec.tv_sec);
 
     struct forecast_data_full forecast;
